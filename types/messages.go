@@ -2,7 +2,7 @@ package types
 
 import "time"
 
-type DiscordSnowflake int
+type DiscordSnowflake string
 
 type DiscordActivity struct {
 	Type    int     `json:"type"`

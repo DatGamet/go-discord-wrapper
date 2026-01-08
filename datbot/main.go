@@ -25,7 +25,7 @@ func main() {
 		if err != nil {
 			bot.Logger.Err(err).Msg("Failed to unwrap MESSAGE_CREATE event")
 		}
-		fmt.Println(fmt.Sprintf("%s said: %s", msg.Author.DisplayName(), msg.Content))
+		fmt.Println(fmt.Sprintf("%s said: %s [Event %d]", msg.Author.DisplayName(), msg.Content, *event.S))
 	})
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

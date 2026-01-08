@@ -30,6 +30,8 @@ type DiscordClient struct {
 	Events map[string]DiscordClientEvent
 
 	mu sync.RWMutex
+
+	LastEventNum *int
 }
 
 func NewDiscordClient(token string, intents types.DiscordIntent) *DiscordClient {
@@ -121,6 +123,8 @@ func (d *DiscordClient) dispatch(event string, payload types.Payload) {
 	if d.Events == nil {
 		return
 	}
+
+	d.LastEventNum = payload.S
 
 	rawEvent := d.Events[event]
 	if rawEvent != nil {

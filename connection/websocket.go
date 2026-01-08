@@ -47,7 +47,7 @@ func NewWebsocket(bot *DiscordClient, host string) (*websocket.Conn, error) {
 		}
 	}()
 
-	identify := map[string]interface{}{
+	if err := c.WriteJSON(map[string]interface{}{
 		"op": 2,
 		"d": map[string]interface{}{
 			"token":   *bot.Token,
@@ -58,9 +58,7 @@ func NewWebsocket(bot *DiscordClient, host string) (*websocket.Conn, error) {
 				"$device":  "dat_bot_go",
 			},
 		},
-	}
-
-	if err := c.WriteJSON(identify); err != nil {
+	}); err != nil {
 		return nil, err
 	}
 
@@ -88,6 +86,8 @@ func (d *DiscordClient) listenWebsocket() error {
 		if err := json.Unmarshal(message, &payload); err != nil {
 			return err
 		}
+
+		d.LastEventNum = payload.S
 
 		d.Logger.Info().Msgf("Received payload: %+v", payload)
 
