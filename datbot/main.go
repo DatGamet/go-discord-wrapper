@@ -16,6 +16,10 @@ func main() {
 
 	bot := connection.NewDiscordClient(os.Getenv("TOKEN"), types.AllIntentsExceptDirectMessage)
 
+	connection.OnEvent(bot, types.DiscordEventReady, func(session *connection.DiscordClient, event *types.DiscordReadyEvent) {
+		session.Logger.Info().Msgf("Logged in as %s#%s", event.User.Username, event.User.Discriminator)
+	})
+
 	connection.OnEvent(bot, types.DiscordEventMessageCreate, func(session *connection.DiscordClient, event *types.DiscordMessageCreateEvent) {
 		session.Logger.Info().Msgf("Received message: %s", event.Content)
 	})

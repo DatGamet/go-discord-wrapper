@@ -14,3 +14,13 @@ func (e DiscordMessageCreateEvent) Unmarshal(data []byte) (DiscordEvent, error) 
 	err := json.Unmarshal(data, &event)
 	return event, err
 }
+
+type DiscordReadyEvent struct {
+	User DiscordUser `json:"user"`
+}
+
+func (e DiscordReadyEvent) Unmarshal(data []byte) (DiscordEvent, error) {
+	var event DiscordReadyEvent
+	err := json.Unmarshal(data, &event)
+	return event, err
+}

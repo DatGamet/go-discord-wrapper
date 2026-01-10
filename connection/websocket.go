@@ -87,9 +87,38 @@ func (d *DiscordClient) listenWebsocket() error {
 			return err
 		}
 
-		d.LastEventNum = payload.S
+		if payload.Op == 7 {
+			d.Logger.Info().Msg("Reconnecting as per Discord instruction (OP 7)")
+			oldWs := d.Websocket
 
-		d.Logger.Info().Msgf("Received payload: %+v", payload)
+			if err := d.connectWebsocket(*d.ReconnectURL); err != nil {
+				return err
+			}
+
+			go func() {
+				if err := d.listenWebsocket(); err != nil {
+					d.Logger.Err(err).Msg("Error listening to websocket")
+				}
+			}()
+
+			_ = oldWs.Close()
+		}
+
+		if payload.S != nil {
+			d.LastEventNum = payload.S
+		}
+
+		d.Logger.Info().Msgf("Received payload: %s %d", payload.T, payload.Op)
+
+		if payload.T == "READY" {
+			var readyEvent types.DiscordReadyPayload
+			if err := json.Unmarshal(payload.D, &readyEvent); err != nil {
+				return err
+			}
+
+			d.SessionID = &readyEvent.SessionID
+			d.ReconnectURL = &readyEvent.ResumeGatewayURL
+		}
 
 		if payload.T != "" {
 			d.dispatch(types.DiscordEventType(payload.T), payload)

@@ -31,6 +31,10 @@ type DiscordClient struct {
 	mu sync.RWMutex
 
 	LastEventNum *int
+
+	ReconnectURL *string
+
+	SessionID *string
 }
 
 func NewDiscordClient(token string, intents types.DiscordIntent) *DiscordClient {
@@ -148,6 +152,12 @@ func (d *DiscordClient) convertToEvent(event types.DiscordEventType, data json.R
 			return nil, err
 		}
 		return &msgCreateEvent, nil
+	case "READY":
+		var readyEvent types.DiscordReadyEvent
+		if err := json.Unmarshal(data, &readyEvent); err != nil {
+			return nil, err
+		}
+		return &readyEvent, nil
 	default:
 		return nil, errors.New("unsupported event type: " + string(event))
 	}
