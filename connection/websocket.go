@@ -92,7 +92,7 @@ func (d *DiscordClient) listenWebsocket() error {
 		d.Logger.Info().Msgf("Received payload: %+v", payload)
 
 		if payload.T != "" {
-			d.dispatch(payload.T, payload)
+			d.dispatch(types.DiscordEventType(payload.T), payload)
 		}
 	}
 }

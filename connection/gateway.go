@@ -3,6 +3,7 @@ package connection
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"go-discord-wrapper/functions"
 	"go-discord-wrapper/types"
 	"go-discord-wrapper/util"
@@ -13,8 +14,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
 )
-
-type DiscordClientEvent func(event types.Payload)
 
 type DiscordClient struct {
 	Token *string
@@ -27,7 +26,7 @@ type DiscordClient struct {
 
 	Websocket *websocket.Conn
 
-	Events map[string]DiscordClientEvent
+	Events map[types.DiscordEventType]func(session *DiscordClient, event types.DiscordEvent)
 
 	mu sync.RWMutex
 
@@ -96,28 +95,31 @@ func (d *DiscordClient) Login() error {
 	return nil
 }
 
-func UnwrapEvent[V any](payload types.Payload) (*V, error) {
-	var data V
-	err := json.Unmarshal(payload.D, &data)
-	if err != nil {
-		return nil, err
-	}
-
-	return &data, err
-}
-
-func (d *DiscordClient) On(event string, handler DiscordClientEvent) {
+func OnEvent[T types.DiscordEvent](d *DiscordClient, event types.DiscordEventType, handler func(*DiscordClient, T)) {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
 	if d.Events == nil {
-		d.Events = make(map[string]DiscordClientEvent)
+		d.Events = make(map[types.DiscordEventType]func(session *DiscordClient, event types.DiscordEvent))
 	}
 
-	d.Events[event] = handler
+	d.Events[event] = func(
+		session *DiscordClient,
+		ev types.DiscordEvent,
+	) {
+		typed, ok := ev.(T)
+		if !ok {
+			session.Logger.Warn().
+				Str("expected", fmt.Sprintf("%T", *new(T))).
+				Str("got", fmt.Sprintf("%T", ev)).
+				Msg("event type mismatch")
+			return
+		}
+		handler(session, typed)
+	}
 }
 
-func (d *DiscordClient) dispatch(event string, payload types.Payload) {
+func (d *DiscordClient) dispatch(event types.DiscordEventType, payload types.Payload) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 	if d.Events == nil {
@@ -128,7 +130,26 @@ func (d *DiscordClient) dispatch(event string, payload types.Payload) {
 
 	rawEvent := d.Events[event]
 	if rawEvent != nil {
-		go rawEvent(payload)
+		discordEvent, err := d.convertToEvent(event, payload.D)
+		if err != nil {
+			d.Logger.Err(err).Msgf("Failed to convert event %s", event)
+			return
+		}
+
+		go rawEvent(d, discordEvent)
+	}
+}
+
+func (d *DiscordClient) convertToEvent(event types.DiscordEventType, data json.RawMessage) (types.DiscordEvent, error) {
+	switch event {
+	case "MESSAGE_CREATE":
+		var msgCreateEvent types.DiscordMessageCreateEvent
+		if err := json.Unmarshal(data, &msgCreateEvent); err != nil {
+			return nil, err
+		}
+		return &msgCreateEvent, nil
+	default:
+		return nil, errors.New("unsupported event type: " + string(event))
 	}
 }
 
