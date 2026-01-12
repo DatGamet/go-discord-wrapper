@@ -114,7 +114,7 @@ type DiscordRoleSubscriptionData struct {
 	IsRenewal                 bool             `json:"is_renewal"`
 }
 
-type DiscordMessageResolved struct {
+type DiscordResolvedData struct {
 	Users       map[DiscordSnowflake]*DiscordUser       `json:"users"`
 	Members     map[DiscordSnowflake]*GuildMember       `json:"members,omitempty"`
 	Messages    map[DiscordSnowflake]*DiscordMessage    `json:"messages,omitempty"`
@@ -174,7 +174,7 @@ type DiscordMessage struct {
 	Poll                 *DiscordPoll                       `json:"poll,omitempty"`
 	Position             *int                               `json:"position,omitempty"`
 	Reactions            *[]DiscordReaction                 `json:"reactions,omitempty"`
-	Resolved             *DiscordMessageResolved            `json:"resolved,omitempty"`
+	Resolved             *DiscordResolvedData               `json:"resolved,omitempty"`
 	ReferencedMessage    *DiscordMessage                    `json:"referenced_message,omitempty"`
 	RoleSubscriptionData *DiscordRoleSubscriptionData       `json:"role_subscription_data,omitempty"`
 	StickerItems         []DiscordMessageStickerItem        `json:"sticker_items,omitempty"`
