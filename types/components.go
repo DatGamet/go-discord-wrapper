@@ -1,9 +1,63 @@
 package types
 
+import "encoding/json"
+
 type DiscordComponentType int
+
+type Components []AnyComponent
+
+const (
+	DiscordComponentTypeActionRow DiscordComponentType = 1
+	DiscordComponentTypeButton    DiscordComponentType = 2
+)
 
 type AnyComponent interface {
 	GetType() DiscordComponentType
+}
+
+type ComponentBase struct {
+	Type DiscordComponentType `json:"type"`
+}
+
+func (b ComponentBase) GetType() DiscordComponentType {
+	return b.Type
+}
+
+func (c *Components) UnmarshalJSON(data []byte) error {
+	var raw []json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	for _, r := range raw {
+		var base ComponentBase
+		if err := json.Unmarshal(r, &base); err != nil {
+			return err
+		}
+
+		var comp AnyComponent
+
+		switch base.Type {
+		case 2:
+			var btn ButtonComponent
+			if err := json.Unmarshal(r, &btn); err != nil {
+				return err
+			}
+			comp = btn
+		default:
+			comp = base
+		}
+
+		*c = append(*c, comp)
+	}
+
+	return nil
+}
+
+type ActionRow struct {
+	ComponentBase
+	ID         *int       `json:"id"`
+	Components Components `json:"components"`
 }
 
 type ButtonStyle int
@@ -23,7 +77,7 @@ type ButtonComponent struct {
 	Style    ButtonStyle          `json:"style"`
 	Label    *string              `json:"label,omitempty"`
 	Emoji    *DiscordEmoji        `json:"emoji,omitempty"`
-	CustomID string               `json:"custom_id,omitempty"`
+	CustomID *string              `json:"custom_id,omitempty"`
 	SkuID    *DiscordSnowflake    `json:"sku_id,omitempty"`
 	URL      *string              `json:"url,omitempty"`
 	Disabled *bool                `json:"disabled,omitempty"`
@@ -48,18 +102,3 @@ const (
 	DiscordApplicationCommandInteractionOptionTypeNumber          DiscordApplicationCommandInteractionOptionType = 10
 	DiscordApplicationCommandInteractionOptionTypeAttachment      DiscordApplicationCommandInteractionOptionType = 11
 )
-
-type AnyApplicationCommandInteractionOption interface {
-	GetType() DiscordApplicationCommandInteractionOptionType
-}
-
-type DiscordApplicationCommandInteractionOptionString struct {
-	Name    string                                         `json:"name"`
-	Type    DiscordApplicationCommandInteractionOptionType `json:"type"`
-	Value   string                                         `json:"value"`
-	Focused *bool                                          `json:"focused,omitempty"`
-}
-
-func (o DiscordApplicationCommandInteractionOptionString) GetType() DiscordApplicationCommandInteractionOptionType {
-	return o.Type
-}
