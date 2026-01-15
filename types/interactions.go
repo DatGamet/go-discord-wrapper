@@ -172,6 +172,47 @@ type DiscordInteraction struct {
 	AttachmentSizeLimit          int                                                          `json:"attachment_size_limit,omitempty"`
 }
 
+func (i *DiscordInteraction) UnmarshalJSON(data []byte) error {
+	type Alias DiscordInteraction
+	aux := &struct {
+		Data json.RawMessage `json:"data"`
+		*Alias
+	}{
+		Alias: (*Alias)(i),
+	}
+
+	if err := json.Unmarshal(data, aux); err != nil {
+		return err
+	}
+
+	if aux.Data == nil {
+		return nil
+	}
+
+	// Peek into data.type
+	var typeProbe struct {
+		Type DiscordInteractionDataApplicationCommandType `json:"type"`
+	}
+
+	if err := json.Unmarshal(aux.Data, &typeProbe); err != nil {
+		return err
+	}
+
+	switch typeProbe.Type {
+	case DiscordInteractionDataApplicationCommandTypeChatInput:
+		var cmd DiscordInteractionDataApplicationCommand
+		if err := json.Unmarshal(aux.Data, &cmd); err != nil {
+			return err
+		}
+		i.Data = &cmd
+
+	default:
+		return fmt.Errorf("unknown interaction data type %d", typeProbe.Type)
+	}
+
+	return nil
+}
+
 type DiscordInteractionDataType int
 
 const (
@@ -183,7 +224,6 @@ const (
 )
 
 type DiscordInteractionData interface {
-	UnmarshalJSON(data []byte) error
 	GetType() DiscordInteractionDataType
 }
 
@@ -197,13 +237,13 @@ const (
 )
 
 type DiscordInteractionDataApplicationCommand struct {
-	ID       DiscordSnowflake                             `json:"id"`
-	Name     string                                       `json:"name"`
-	Type     DiscordInteractionDataApplicationCommandType `json:"type"`
-	GuildID  *DiscordSnowflake                            `json:"guild_id,omitempty"`
-	TargetID *DiscordSnowflake                            `json:"target_id,omitempty"`
-	Resolved *DiscordResolvedData                         `json:"resolved,omitempty"`
-	Options  *[]AnyDiscordMessageInteractionMetadata      `json:"options,omitempty"`
+	ID          DiscordSnowflake                             `json:"id"`
+	CommandName string                                       `json:"name"`
+	Type        DiscordInteractionDataApplicationCommandType `json:"type"`
+	GuildID     *DiscordSnowflake                            `json:"guild_id,omitempty"`
+	TargetID    *DiscordSnowflake                            `json:"target_id,omitempty"`
+	Resolved    *DiscordResolvedData                         `json:"resolved,omitempty"`
+	Options     []AnyDiscordMessageInteractionMetadata       `json:"options,omitempty"`
 }
 
 func (d *DiscordInteractionDataApplicationCommand) GetType() DiscordInteractionDataType {
@@ -237,7 +277,7 @@ func (d *DiscordInteractionDataApplicationCommand) UnmarshalJSON(data []byte) er
 			if err := json.Unmarshal(rawOption, &option); err != nil {
 				return err
 			}
-			*d.Options = append(*d.Options, option)
+			d.Options = append(d.Options, option)
 		}
 	}
 

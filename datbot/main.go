@@ -25,6 +25,13 @@ func main() {
 		session.Logger.Info().Msgf("Received message: %s", event.Content)
 	})
 
+	bot.OnInteractionCreate(func(session *connection.DiscordClient, event *types.DiscordInteractionCreateEvent) {
+		if event.IsCommand() {
+			data := event.Data.(*types.DiscordInteractionDataApplicationCommand)
+			bot.Logger.Debug().Msgf("Received interaction command %s from %s", data.CommandName, event.Member.User.DisplayName())
+		}
+	})
+
 	if err := bot.Login(); err != nil {
 		panic(err)
 	}
@@ -34,7 +41,5 @@ func main() {
 
 	<-ctx.Done()
 	bot.Logger.Info().Msg("Shutting down bot")
-	if err := bot.Shutdown(); err != nil {
-		bot.Logger.Err(err).Msg("Error shutting down bot")
-	}
+	bot.Shutdown()
 }

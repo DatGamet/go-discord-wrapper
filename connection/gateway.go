@@ -139,6 +139,8 @@ func (d *DiscordClient) OnGuildCreate(
 	) {
 		if e, ok := event.(*types.DiscordGuildCreateEvent); ok {
 			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to GuildCreateEvent: %T", event)
 		}
 	})
 }
@@ -158,6 +160,21 @@ func (d *DiscordClient) OnMessageCreate(
 	})
 }
 
+func (d *DiscordClient) OnInteractionCreate(
+	handler func(*DiscordClient, *types.DiscordInteractionCreateEvent),
+) {
+	d.onEvent(types.DiscordEventInteractionCreate, func(
+		session *DiscordClient,
+		event types.DiscordEvent,
+	) {
+		if e, ok := event.(*types.DiscordInteractionCreateEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to InteractionCreateEvent: %T", event)
+		}
+	})
+}
+
 func (d *DiscordClient) dispatch(event types.DiscordEvent) {
 	handlers := d.Events[event.Event()]
 	for _, h := range handlers {
@@ -169,7 +186,7 @@ func (d *DiscordClient) internalEventHandler(msg json.RawMessage, event types.Di
 	switch event {
 	case types.DiscordEventReady:
 		{
-			var readyEvent types.DiscordReadyPayload
+			var readyEvent types.DiscordReadyEvent
 			if err := json.Unmarshal(msg, &readyEvent); err != nil {
 				d.Logger.Err(err).Msg("Failed to unmarshal READY event")
 			}
@@ -228,9 +245,6 @@ func (d *DiscordClient) IsGuildUnavailable(id types.DiscordSnowflake) bool {
 	return exists
 }
 
-func (d *DiscordClient) Shutdown() error {
-	if d.Websocket != nil {
-		return d.Websocket.Close()
-	}
-	return nil
+func (d *DiscordClient) Shutdown() {
+	_ = d.Websocket.Close()
 }

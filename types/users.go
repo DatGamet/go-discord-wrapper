@@ -41,17 +41,18 @@ func (u *DiscordUser) DisplayName() string {
 }
 
 type GuildMember struct {
-	AvatarHash                 *string    `json:"avatar,omitempty"`
-	BannerHash                 *string    `json:"banner,omitempty"`
-	CommunicationDisabledUntil *string    `json:"communication_disabled_until,omitempty"`
-	Deaf                       bool       `json:"deaf"`
-	Flags                      int        `json:"flags"`
-	JoinedAt                   time.Time  `json:"joined_at"`
-	Mute                       bool       `json:"mute"`
-	Nick                       *string    `json:"nick,omitempty"`
-	Pending                    bool       `json:"pending,omitempty"`
-	PremiumSince               *time.Time `json:"premium_since,omitempty"`
-	Roles                      []string   `json:"roles"`
+	AvatarHash                 *string      `json:"avatar,omitempty"`
+	BannerHash                 *string      `json:"banner,omitempty"`
+	CommunicationDisabledUntil *string      `json:"communication_disabled_until,omitempty"`
+	Deaf                       bool         `json:"deaf"`
+	Flags                      int          `json:"flags"`
+	JoinedAt                   time.Time    `json:"joined_at"`
+	Mute                       bool         `json:"mute"`
+	Nick                       *string      `json:"nick,omitempty"`
+	Pending                    bool         `json:"pending,omitempty"`
+	PremiumSince               *time.Time   `json:"premium_since,omitempty"`
+	Roles                      []string     `json:"roles"`
+	User                       *DiscordUser `json:"user,omitempty"`
 }
 
 type ThreadMember struct {
