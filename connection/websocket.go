@@ -67,7 +67,7 @@ func NewWebsocket(bot *DiscordClient, host string, isReconnect bool) (*websocket
 			return nil, err
 		}
 	} else {
-		if err := c.WriteJSON(map[string]interface{}{
+		data := map[string]interface{}{
 			"op": 2,
 			"d": map[string]interface{}{
 				"token":   *bot.Token,
@@ -78,7 +78,13 @@ func NewWebsocket(bot *DiscordClient, host string, isReconnect bool) (*websocket
 					"$device":  "dat_bot_go",
 				},
 			},
-		}); err != nil {
+		}
+
+		if bot.Sharding != nil {
+			data["d"].(map[string]interface{})["shard"] = []int{bot.Sharding.ShardID, bot.Sharding.TotalShards}
+		}
+
+		if err := c.WriteJSON(data); err != nil {
 			return nil, err
 		}
 	}
@@ -172,6 +178,10 @@ func (d *DiscordClient) listenWebsocket() error {
 			}
 
 			event := factory()
+
+			var anyVal any
+			_ = json.Unmarshal(payload.D, &anyVal)
+			d.Logger.Trace().Msgf("Event payload: %+v", anyVal)
 
 			if err := json.Unmarshal(payload.D, event); err != nil {
 				d.Logger.Err(err).Msgf("Failed to unmarshal event %s", payload.T)

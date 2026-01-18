@@ -17,6 +17,11 @@ import (
 
 type EventHandler func(*DiscordClient, types.DiscordEvent)
 
+type DiscordClientSharding struct {
+	TotalShards int
+	ShardID     int
+}
+
 type DiscordClient struct {
 	Token *string
 
@@ -41,15 +46,20 @@ type DiscordClient struct {
 	UnavailableGuilds map[types.DiscordSnowflake]struct{}
 
 	LastHeartbeat *time.Time
+
+	User *types.DiscordUser
+
+	Sharding *DiscordClientSharding
 }
 
-func NewDiscordClient(token string, intents types.DiscordIntent) *DiscordClient {
+func NewDiscordClient(token string, intents types.DiscordIntent, sharding *DiscordClientSharding) *DiscordClient {
 	return &DiscordClient{
 		Token:             &token,
 		APIVersion:        functions.PointerTo(types.DiscordAPIVersion10),
 		Logger:            util.NewLogger(),
 		Intents:           &intents,
 		UnavailableGuilds: make(map[types.DiscordSnowflake]struct{}),
+		Sharding:          sharding,
 	}
 }
 
@@ -133,7 +143,7 @@ func (d *DiscordClient) onEvent(
 func (d *DiscordClient) OnGuildCreate(
 	handler func(*DiscordClient, *types.DiscordGuildCreateEvent),
 ) {
-	d.onEvent(types.DiscordEventReady, func(
+	d.onEvent(types.DiscordEventGuildCreate, func(
 		session *DiscordClient,
 		event types.DiscordEvent,
 	) {
@@ -193,6 +203,11 @@ func (d *DiscordClient) internalEventHandler(msg json.RawMessage, event types.Di
 
 			d.SessionID = &readyEvent.SessionID
 			d.ReconnectURL = &readyEvent.ResumeGatewayURL
+			d.User = &readyEvent.User
+
+			if readyEvent.Shard != nil {
+				d.Logger.Info().Msgf("Connected to shard %d of %d", readyEvent.Shard[0]+1, readyEvent.Shard[1])
+			}
 
 			for _, guild := range readyEvent.Guilds {
 				if !guild.Guild.IsAvailable() {

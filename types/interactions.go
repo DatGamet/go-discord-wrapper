@@ -377,7 +377,7 @@ type DiscordInteractionResponseData struct {
 	Embeds          *[]DiscordEmbed         `json:"embeds,omitempty"`
 	AllowedMentions *DiscordAllowedMentions `json:"allowed_mentions,omitempty"`
 	Flags           DiscordMessageFlag      `json:"flags,omitempty"`
-	Components      *Components             `json:"components,omitempty"`
+	Components      *[]AnyComponent         `json:"components,omitempty"`
 	//TODO partial
 	Attachment   *[]DiscordAttachment `json:"attachment,omitempty"`
 	Poll         *DiscordPollRequest  `json:"poll,omitempty"`
@@ -389,7 +389,85 @@ type DiscordInteractionResponse struct {
 	Data *DiscordInteractionResponseData `json:"data,omitempty"`
 }
 
-func (i *DiscordInteraction) CreateInteractionResponse(responseData *DiscordInteractionResponse) (*any, error) {
+func (i *DiscordInteraction) DeferReply() error {
+	return nil
+}
+
+func (i *DiscordInteraction) EditReply(responseData *DiscordInteractionResponseData, clientID string) error {
+	bodyBytes, err := json.Marshal(*responseData)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.DefaultClient.Do(&http.Request{
+		Method: "PATCH",
+		URL: &url.URL{
+			Scheme: "https",
+			Host:   "discord.com",
+			Path:   "/api/v10/webhooks/" + clientID + "/" + i.Token + "/messages/@original",
+		},
+		Header: http.Header{
+			"Authorization": []string{"Bot " + ""},
+			"Content-Type":  []string{"application/json"},
+		},
+		Body: io.NopCloser(bytes.NewReader(bodyBytes)),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(req.Body)
+
+	if req.StatusCode != http.StatusOK {
+		var respErr map[string]interface{}
+		if err := json.NewDecoder(req.Body).Decode(&respErr); err != nil {
+			return err
+		}
+
+		return fmt.Errorf("expected 204 No Content, got %d: %v", req.StatusCode, respErr)
+	}
+
+	return nil
+}
+
+func (i *DiscordInteraction) DeleteReply(clientID string) error {
+	req, err := http.DefaultClient.Do(&http.Request{
+		Method: "DELETE",
+		URL: &url.URL{
+			Scheme: "https",
+			Host:   "discord.com",
+			Path:   "/api/v10/webhooks/" + clientID + "/" + i.Token + "/messages/@original",
+		},
+		Header: http.Header{
+			"Authorization": []string{"Bot " + ""},
+			"Content-Type":  []string{"application/json"},
+		},
+	})
+
+	if err != nil {
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(req.Body)
+
+	if req.StatusCode != http.StatusNoContent {
+		var respErr map[string]interface{}
+		if err := json.NewDecoder(req.Body).Decode(&respErr); err != nil {
+			return err
+		}
+
+		return fmt.Errorf("expected 204 No Content, got %d: %v", req.StatusCode, respErr)
+	}
+
+	return nil
+}
+
+func (i *DiscordInteraction) Reply(responseData *DiscordInteractionResponse) (*any, error) {
 	bodyBytes, err := json.Marshal(*responseData)
 	if err != nil {
 		return nil, err
@@ -398,9 +476,10 @@ func (i *DiscordInteraction) CreateInteractionResponse(responseData *DiscordInte
 	req, err := http.DefaultClient.Do(&http.Request{
 		Method: "POST",
 		URL: &url.URL{
-			Scheme: "https",
-			Host:   "discord.com",
-			Path:   "/api/v10/interactions/" + string(i.ID) + "/" + i.Token + "/callback",
+			Scheme:   "https",
+			Host:     "discord.com",
+			Path:     "/api/v10/interactions/" + string(i.ID) + "/" + i.Token + "/callback",
+			RawQuery: "with_response=" + fmt.Sprintf("%t", responseData.Data.WithResponse),
 		},
 		Header: http.Header{
 			"Authorization": []string{"Bot " + ""},

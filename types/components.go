@@ -1,10 +1,10 @@
 package types
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type DiscordComponentType int
-
-type Components []AnyComponent
 
 const (
 	DiscordComponentTypeActionRow        DiscordComponentType = 1
@@ -31,49 +31,50 @@ type AnyComponent interface {
 	GetType() DiscordComponentType
 }
 
-type ComponentBase struct {
-	Type DiscordComponentType `json:"type"`
+type ActionRow struct {
+	Type       DiscordComponentType `json:"type"`
+	ID         *int                 `json:"id"`
+	Components []AnyComponent       `json:"components"`
 }
 
-func (b ComponentBase) GetType() DiscordComponentType {
-	return b.Type
+func (a *ActionRow) GetType() DiscordComponentType {
+	return DiscordComponentTypeActionRow
 }
 
-func (c *Components) UnmarshalJSON(data []byte) error {
-	var raw []json.RawMessage
+func (a *ActionRow) UnmarshalJSON(data []byte) error {
+	type Alias ActionRow
+
+	var raw struct {
+		Alias
+		Components []json.RawMessage `json:"components"`
+	}
+
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
 
-	for _, r := range raw {
-		var base ComponentBase
-		if err := json.Unmarshal(r, &base); err != nil {
+	*a = ActionRow(raw.Alias)
+
+	for _, c := range raw.Components {
+		var probe struct {
+			Type DiscordComponentType `json:"type"`
+		}
+
+		if err := json.Unmarshal(c, &probe); err != nil {
 			return err
 		}
 
-		var comp AnyComponent
-
-		switch base.Type {
-		case 2:
-			var btn ButtonComponent
-			if err := json.Unmarshal(r, &btn); err != nil {
+		switch probe.Type {
+		case DiscordComponentTypeButton:
+			var b ButtonComponent
+			if err := json.Unmarshal(c, &b); err != nil {
 				return err
 			}
-			comp = btn
-		default:
-			comp = base
+			a.Components = append(a.Components, &b)
 		}
-
-		*c = append(*c, comp)
 	}
 
 	return nil
-}
-
-type ActionRow struct {
-	ComponentBase
-	ID         *int       `json:"id"`
-	Components Components `json:"components"`
 }
 
 type ButtonStyle int
@@ -91,16 +92,16 @@ type ButtonComponent struct {
 	Type     DiscordComponentType `json:"type"`
 	ID       *int                 `json:"id,omitempty"`
 	Style    ButtonStyle          `json:"style"`
-	Label    *string              `json:"label,omitempty"`
+	Label    string               `json:"label,omitempty"`
 	Emoji    *DiscordEmoji        `json:"emoji,omitempty"`
-	CustomID *string              `json:"custom_id,omitempty"`
+	CustomID string               `json:"custom_id,omitempty"`
 	SkuID    *DiscordSnowflake    `json:"sku_id,omitempty"`
-	URL      *string              `json:"url,omitempty"`
-	Disabled *bool                `json:"disabled,omitempty"`
+	URL      string               `json:"url,omitempty"`
+	Disabled bool                 `json:"disabled,omitempty"`
 }
 
 func (b ButtonComponent) GetType() DiscordComponentType {
-	return b.Type
+	return DiscordComponentTypeButton
 }
 
 type DiscordApplicationCommandInteractionOptionType int
@@ -118,11 +119,3 @@ const (
 	DiscordApplicationCommandInteractionOptionTypeNumber          DiscordApplicationCommandInteractionOptionType = 10
 	DiscordApplicationCommandInteractionOptionTypeAttachment      DiscordApplicationCommandInteractionOptionType = 11
 )
-
-type DiscordSelectOptionValue struct {
-	Label       string        `json:"label"`
-	Value       string        `json:"value"`
-	Description *string       `json:"description,omitempty"`
-	Emoji       *DiscordEmoji `json:"emoji,omitempty"`
-	Default     *bool         `json:"default,omitempty"`
-}

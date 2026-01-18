@@ -15,7 +15,14 @@ import (
 func main() {
 	_ = godotenv.Load()
 
-	bot := connection.NewDiscordClient(os.Getenv("TOKEN"), types.AllIntentsExceptDirectMessage)
+	bot := connection.NewDiscordClient(
+		os.Getenv("TOKEN"),
+		types.AllIntentsExceptDirectMessage,
+		&connection.DiscordClientSharding{
+			TotalShards: 1,
+			ShardID:     0,
+		},
+	)
 
 	bot.OnGuildCreate(func(session *connection.DiscordClient, event *types.DiscordGuildCreateEvent) {
 		fmt.Println("New guild")
@@ -29,10 +36,23 @@ func main() {
 		if event.IsCommand() {
 			bot.Logger.Debug().Msgf("Received interaction command %s from %s", event.GetFullCommand(), event.Member.User.DisplayName())
 
-			_, err := event.CreateInteractionResponse(&types.DiscordInteractionResponse{
+			_, err := event.Reply(&types.DiscordInteractionResponse{
 				Data: &types.DiscordInteractionResponseData{
 					Content: fmt.Sprintf("You invoked the command: %s", event.GetFullCommand()),
-					Flags:   types.DiscordMessageFlagSuppressEmbeds,
+					Flags:   types.DiscordMessageFlagEphemeral,
+					Components: &[]types.AnyComponent{
+						&types.ActionRow{
+							Type: types.DiscordComponentTypeActionRow,
+							Components: []types.AnyComponent{
+								types.ButtonComponent{
+									Type:     types.DiscordComponentTypeButton,
+									Style:    types.ButtonStyleSecondary,
+									Label:    "Click Me!",
+									CustomID: "button_click_me",
+								},
+							},
+						},
+					},
 				},
 				Type: types.DiscordInteractionCallbackTypeChannelMessageWithSource,
 			})
@@ -44,6 +64,20 @@ func main() {
 
 		if event.IsButton() {
 			bot.Logger.Debug().Msgf("Received button interaction with custom ID %s from %s", event.GetCustomID(), event.Member.User.DisplayName())
+
+			if event.GetCustomID() == "button_click_me" {
+				_, err := event.Reply(&types.DiscordInteractionResponse{
+					Data: &types.DiscordInteractionResponseData{
+						Content: "You clicked the button!",
+						Flags:   types.DiscordMessageFlagEphemeral,
+					},
+					Type: types.DiscordInteractionCallbackTypeChannelMessageWithSource,
+				})
+
+				if err != nil {
+					bot.Logger.Error().Msgf("Failed to create button interaction response: %v", err)
+				}
+			}
 		}
 
 		if event.IsAnySelectMenu() {
