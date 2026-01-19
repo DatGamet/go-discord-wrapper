@@ -114,7 +114,7 @@ func (d *DiscordClient) reconnect(freshConnect bool) error {
 		return err
 	}
 
-	d.Logger.Info().Msg("Reconnected to Discord gateway")
+	d.Logger.Debug().Msg("Reconnected to Discord gateway")
 	return nil
 }
 
@@ -179,11 +179,11 @@ func (d *DiscordClient) listenWebsocket() error {
 
 			event := factory()
 
-			var anyVal any
-			_ = json.Unmarshal(payload.D, &anyVal)
-			d.Logger.Trace().Msgf("Event payload: %+v", anyVal)
-
 			if err := json.Unmarshal(payload.D, event); err != nil {
+				var anyVal any
+				_ = json.Unmarshal(payload.D, &anyVal)
+				d.Logger.Debug().Msgf("Failed Event payload: %+v", anyVal)
+
 				d.Logger.Err(err).Msgf("Failed to unmarshal event %s", payload.T)
 				continue
 			}

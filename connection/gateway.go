@@ -101,7 +101,7 @@ func (d *DiscordClient) Login() error {
 		return err
 	}
 
-	d.Logger.Info().Msgf("Connecting to gateway websocket at %s with %d shards", gatewayResp.Url, gatewayResp.Shards)
+	d.Logger.Debug().Msgf("Connecting to gateway websocket at %s with %d shards", gatewayResp.Url, gatewayResp.Shards)
 
 	if err := d.connectWebsocket(gatewayResp.Url, false); err != nil {
 		return err
@@ -111,13 +111,13 @@ func (d *DiscordClient) Login() error {
 		if err := d.listenWebsocket(); err != nil {
 			d.Logger.Err(err).Msg("Error listening to websocket")
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure, 4000, 4001, 4002, 4003, 4005, 4007, 4008, 4009) {
-				d.Logger.Info().Msg("Discord gateway connection closed by Discord, trying to reconnect")
+				d.Logger.Debug().Msg("Discord gateway connection closed by Discord, trying to reconnect")
 				if err := d.reconnect(true); err != nil {
 					d.Logger.Err(err).Msg("Failed to reconnect")
 				}
 			}
 
-			d.Logger.Info().Msg("Discord gateway connection closed by Discord, no reconnecting attempt will be made")
+			d.Logger.Debug().Msg("Discord gateway connection closed by Discord, no reconnecting attempt will be made")
 
 			return
 		}
@@ -206,7 +206,7 @@ func (d *DiscordClient) internalEventHandler(msg json.RawMessage, event types.Di
 			d.User = &readyEvent.User
 
 			if readyEvent.Shard != nil {
-				d.Logger.Info().Msgf("Connected to shard %d of %d", readyEvent.Shard[0]+1, readyEvent.Shard[1])
+				d.Logger.Debug().Msgf("Connected to shard %d of %d", readyEvent.Shard[0]+1, readyEvent.Shard[1])
 			}
 
 			for _, guild := range readyEvent.Guilds {
