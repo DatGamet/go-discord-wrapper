@@ -126,7 +126,7 @@ func (d *DiscordClient) Login() error {
 	return nil
 }
 
-func (d *DiscordClient) onEvent(
+func (d *DiscordClient) OnEvent(
 	eventName types.DiscordEventType,
 	handler EventHandler,
 ) {
@@ -143,7 +143,7 @@ func (d *DiscordClient) onEvent(
 func (d *DiscordClient) OnGuildCreate(
 	handler func(*DiscordClient, *types.DiscordGuildCreateEvent),
 ) {
-	d.onEvent(types.DiscordEventGuildCreate, func(
+	d.OnEvent(types.DiscordEventGuildCreate, func(
 		session *DiscordClient,
 		event types.DiscordEvent,
 	) {
@@ -158,7 +158,7 @@ func (d *DiscordClient) OnGuildCreate(
 func (d *DiscordClient) OnMessageCreate(
 	handler func(*DiscordClient, *types.DiscordMessageCreateEvent),
 ) {
-	d.onEvent(types.DiscordEventMessageCreate, func(
+	d.OnEvent(types.DiscordEventMessageCreate, func(
 		session *DiscordClient,
 		event types.DiscordEvent,
 	) {
@@ -173,7 +173,7 @@ func (d *DiscordClient) OnMessageCreate(
 func (d *DiscordClient) OnInteractionCreate(
 	handler func(*DiscordClient, *types.DiscordInteractionCreateEvent),
 ) {
-	d.onEvent(types.DiscordEventInteractionCreate, func(
+	d.OnEvent(types.DiscordEventInteractionCreate, func(
 		session *DiscordClient,
 		event types.DiscordEvent,
 	) {
