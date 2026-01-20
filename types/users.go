@@ -23,7 +23,7 @@ type DiscordUser struct {
 	Discriminator        string                `json:"discriminator"`
 	Flags                int                   `json:"flags"`
 	GlobalName           *string               `json:"global_name,omitempty"`
-	ID                   string                `json:"id"`
+	ID                   DiscordSnowflake      `json:"id"`
 	Locale               *string               `json:"locale,omitempty"`
 	MFAEnabled           bool                  `json:"mfa_enabled"`
 	PrimaryGuild         *DiscordClan          `json:"primary_guild,omitempty"`

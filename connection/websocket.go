@@ -3,7 +3,6 @@ package connection
 import (
 	"encoding/json"
 	"go-discord-wrapper/types"
-	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -12,7 +11,7 @@ import (
 func NewWebsocket(bot *DiscordClient, host string, isReconnect bool) (*websocket.Conn, error) {
 	c, _, err := websocket.DefaultDialer.Dial(host+"?v=10&encoding=json", nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, err
 	}
 
 	_, message, err := c.ReadMessage()

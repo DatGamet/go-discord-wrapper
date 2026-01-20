@@ -29,6 +29,7 @@ func (c DiscordComponentType) IsAnySelectMenu() bool {
 
 type AnyComponent interface {
 	GetType() DiscordComponentType
+	MarshalJSON() ([]byte, error)
 }
 
 type ActionRow struct {
@@ -39,6 +40,24 @@ type ActionRow struct {
 
 func (a *ActionRow) GetType() DiscordComponentType {
 	return DiscordComponentTypeActionRow
+}
+
+func NewActionRow(id *int, components ...AnyComponent) *ActionRow {
+	return &ActionRow{
+		Type:       DiscordComponentTypeActionRow,
+		Components: components,
+		ID:         id,
+	}
+}
+
+func (a *ActionRow) MarshalJSON() ([]byte, error) {
+	a.Type = DiscordComponentTypeActionRow
+	type Alias ActionRow
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(a),
+	})
 }
 
 func (a *ActionRow) UnmarshalJSON(data []byte) error {
@@ -100,8 +119,159 @@ type ButtonComponent struct {
 	Disabled bool                 `json:"disabled,omitempty"`
 }
 
+func (b ButtonComponent) MarshalJSON() ([]byte, error) {
+	b.Type = DiscordComponentTypeButton
+	type Alias ButtonComponent
+	return json.Marshal(&struct {
+		Alias
+	}{
+		Alias: (Alias)(b),
+	})
+}
+
 func (b ButtonComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeButton
+}
+
+type StringSelectMenuComponent struct {
+	Type        DiscordComponentType               `json:"type"`
+	ID          *int                               `json:"id,omitempty"`
+	CustomID    string                             `json:"custom_id"`
+	Placeholder string                             `json:"placeholder,omitempty"`
+	MinValues   *int                               `json:"min_values,omitempty"`
+	MaxValues   *int                               `json:"max_values,omitempty"`
+	Required    bool                               `json:"required,omitempty"`
+	Options     *[]StringSelectMenuComponentOption `json:"options"`
+	Disabled    bool                               `json:"disabled,omitempty"`
+}
+
+func (s StringSelectMenuComponent) MarshalJSON() ([]byte, error) {
+	s.Type = DiscordComponentTypeStringSelectMenu
+	type Alias StringSelectMenuComponent
+	return json.Marshal(&struct {
+		Alias
+	}{
+		Alias: (Alias)(s),
+	})
+}
+
+func (s StringSelectMenuComponent) GetType() DiscordComponentType {
+	return DiscordComponentTypeStringSelectMenu
+}
+
+type StringSelectMenuComponentOption struct {
+	Label       string        `json:"label"`
+	Value       string        `json:"value"`
+	Description string        `json:"description,omitempty"`
+	Emoji       *DiscordEmoji `json:"emoji,omitempty"`
+	Default     bool          `json:"default,omitempty"`
+}
+
+type UserSelectMenuComponent struct {
+	Type          DiscordComponentType  `json:"type"`
+	ID            *int                  `json:"id,omitempty"`
+	CustomID      string                `json:"custom_id"`
+	Placeholder   string                `json:"placeholder,omitempty"`
+	MinValues     *int                  `json:"min_values,omitempty"`
+	MaxValues     *int                  `json:"max_values,omitempty"`
+	Required      bool                  `json:"required,omitempty"`
+	Disabled      bool                  `json:"disabled,omitempty"`
+	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
+}
+
+func (u UserSelectMenuComponent) MarshalJSON() ([]byte, error) {
+	u.Type = DiscordComponentTypeUserSelectMenu
+	type Alias UserSelectMenuComponent
+	return json.Marshal(&struct {
+		Alias
+	}{
+		Alias: (Alias)(u),
+	})
+}
+
+func (u UserSelectMenuComponent) GetType() DiscordComponentType {
+	return DiscordComponentTypeUserSelectMenu
+}
+
+type RoleSelectMenuComponent struct {
+	Type          DiscordComponentType  `json:"type"`
+	ID            *int                  `json:"id,omitempty"`
+	CustomID      string                `json:"custom_id"`
+	Placeholder   string                `json:"placeholder,omitempty"`
+	MinValues     *int                  `json:"min_values,omitempty"`
+	MaxValues     *int                  `json:"max_values,omitempty"`
+	Required      bool                  `json:"required,omitempty"`
+	Disabled      bool                  `json:"disabled,omitempty"`
+	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
+}
+
+func (r RoleSelectMenuComponent) MarshalJSON() ([]byte, error) {
+	r.Type = DiscordComponentTypeRoleSelectMenu
+	type Alias UserSelectMenuComponent
+	return json.Marshal(&struct {
+		Alias
+	}{
+		Alias: (Alias)(r),
+	})
+}
+
+func (r RoleSelectMenuComponent) GetType() DiscordComponentType {
+	return DiscordComponentTypeRoleSelectMenu
+}
+
+type MentionableSelectMenuComponent struct {
+	Type          DiscordComponentType  `json:"type"`
+	ID            *int                  `json:"id,omitempty"`
+	CustomID      string                `json:"custom_id"`
+	Placeholder   string                `json:"placeholder,omitempty"`
+	MinValues     *int                  `json:"min_values,omitempty"`
+	MaxValues     *int                  `json:"max_values,omitempty"`
+	Required      bool                  `json:"required,omitempty"`
+	Disabled      bool                  `json:"disabled,omitempty"`
+	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
+}
+
+func (m MentionableSelectMenuComponent) MarshalJSON() ([]byte, error) {
+	m.Type = DiscordComponentTypeMentionableMenu
+	type Alias MentionableSelectMenuComponent
+	return json.Marshal(&struct {
+		Alias
+	}{
+		Alias: (Alias)(m),
+	})
+}
+
+func (m MentionableSelectMenuComponent) GetType() DiscordComponentType {
+	return DiscordComponentTypeMentionableMenu
+}
+
+type ChannelSelectMenuComponent struct {
+	Type          DiscordComponentType  `json:"type"`
+	ID            *int                  `json:"id,omitempty"`
+	CustomID      string                `json:"custom_id"`
+	Placeholder   string                `json:"placeholder,omitempty"`
+	MinValues     *int                  `json:"min_values,omitempty"`
+	MaxValues     *int                  `json:"max_values,omitempty"`
+	Required      bool                  `json:"required,omitempty"`
+	Disabled      bool                  `json:"disabled,omitempty"`
+	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
+}
+
+func (c ChannelSelectMenuComponent) RoleSelectMenuComponent() DiscordComponentType {
+	return DiscordComponentTypeRoleSelectMenu
+}
+
+type SelectDefaultValueType string
+
+const (
+	SelectDefaultValueTypeUser    SelectDefaultValueType = "user"
+	SelectDefaultValueTypeRole    SelectDefaultValueType = "role"
+	SelectDefaultValueTypeChannel SelectDefaultValueType = "channel"
+)
+
+type SelectDefaultValue struct {
+	ID   DiscordSnowflake       `json:"id"`
+	Type SelectDefaultValueType `json:"type"`
 }
 
 type DiscordApplicationCommandInteractionOptionType int

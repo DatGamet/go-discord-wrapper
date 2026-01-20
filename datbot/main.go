@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-discord-wrapper/connection"
+	"go-discord-wrapper/functions"
 	"go-discord-wrapper/types"
 	"os"
 	"os/signal"
@@ -42,13 +43,60 @@ func main() {
 					Flags:   types.DiscordMessageFlagEphemeral,
 					Components: &[]types.AnyComponent{
 						&types.ActionRow{
-							Type: types.DiscordComponentTypeActionRow,
 							Components: []types.AnyComponent{
 								types.ButtonComponent{
-									Type:     types.DiscordComponentTypeButton,
 									Style:    types.ButtonStyleSecondary,
 									Label:    "Click Me!",
 									CustomID: "button_click_me",
+								},
+							},
+						},
+
+						&types.ActionRow{
+							Components: []types.AnyComponent{
+								types.StringSelectMenuComponent{
+									CustomID: "select_menu_1",
+									Options: &[]types.StringSelectMenuComponentOption{
+										{
+											Label:       "Option 1",
+											Value:       "option_1",
+											Description: "This is the first option",
+											Default:     true,
+											Emoji: &types.DiscordEmoji{
+												Name: "🔥",
+											},
+										},
+										{
+											Label:       "Option 2",
+											Value:       "option_2",
+											Description: "This is the second option",
+										},
+										{
+											Label:       "Option 3",
+											Value:       "option_3",
+											Description: "This is the third option",
+										},
+									},
+									Placeholder: "Choose an option",
+									MinValues:   functions.PointerTo(1),
+									MaxValues:   functions.PointerTo(1),
+								},
+							},
+						},
+
+						&types.ActionRow{
+							Components: []types.AnyComponent{
+								types.UserSelectMenuComponent{
+									CustomID:    "select_menu_2",
+									Placeholder: "Choose an option",
+									MinValues:   functions.PointerTo(1),
+									MaxValues:   functions.PointerTo(1),
+									DefaultValues: &[]types.SelectDefaultValue{
+										{
+											Type: types.SelectDefaultValueTypeUser,
+											ID:   event.Member.User.ID,
+										},
+									},
 								},
 							},
 						},
