@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-discord-wrapper/connection"
+	"go-discord-wrapper/functions"
 	"go-discord-wrapper/types"
 	"os"
 	"os/signal"
@@ -33,36 +34,89 @@ func main() {
 	})
 
 	bot.OnInteractionCreate(func(session *connection.DiscordClient, event *types.DiscordInteractionCreateEvent) {
+		if event.GetFullCommand() == "info channel" {
+			bot.Logger.Debug().Msgf("Received info channel command from %s", event.Member.User.DisplayName())
+
+			if err := event.ReplyWithModal(&types.Modal{
+				Title:    "Modal",
+				CustomID: "modal",
+				Components: &[]types.LabelComponent{
+					{
+						Label:       "Input 1",
+						Description: "lololol",
+						Component: types.FileUploadComponent{
+							CustomID: "input_1",
+							Required: functions.PointerTo(false),
+						},
+					}, {
+						Label:       "Input 2",
+						Description: "adadadadadad",
+						Component: types.TextInputComponent{
+							CustomID:    "input_2",
+							Style:       types.TextInputStyleParagraph,
+							Required:    true,
+							Value:       "123456",
+							Placeholder: ":D",
+						},
+					},
+				},
+			}); err != nil {
+				bot.Logger.Error().Msgf("Failed to create modal interaction response: %v", err)
+				return
+			}
+			return
+		}
+
 		if event.IsCommand() {
 			bot.Logger.Debug().Msgf("Received interaction command %s from %s", event.GetFullCommand(), event.Member.User.DisplayName())
 
-			_, err := event.Reply(&types.DiscordInteractionResponse{
-				Data: &types.DiscordInteractionResponseData{
-					Flags: types.DiscordMessageFlagEphemeral | types.DiscordMessageFlagIsComponentsV2,
-					Components: &[]types.AnyComponent{
-						types.Container{
-							Components: &[]types.AnyContainerComponent{
-								types.TextDisplayComponent{
-									Content: "## Hey!",
-								},
+			_, err := event.Reply(&types.DiscordInteractionResponseDataDefault{
+				Flags: types.DiscordMessageFlagEphemeral | types.DiscordMessageFlagIsComponentsV2,
+				Components: &[]types.AnyComponent{
+					types.TextDisplayComponent{
+						Content: "Hello, " + event.Member.User.DisplayName() + "!",
+					},
 
-								types.Section{
-									Components: &[]types.AnySectionComponent{
-										types.TextDisplayComponent{
-											Content: "You used the command **" + event.GetFullCommand() + "**",
-										},
+					types.SeparatorComponent{
+						SeparatorComponentSpacing: types.SeparatorComponentSpacingSmall,
+					},
+
+					types.MediaGalleryComponent{
+						Items: &[]types.MediaGalleryItem{
+							{
+								Media: &types.UnfurledMediaItem{
+									URL: "https://i.imgur.com/AfFp7pu.png",
+								},
+							},
+							{
+								Media: &types.UnfurledMediaItem{
+									URL: "https://i.imgur.com/AfFp7pu.png",
+								},
+							},
+						},
+					},
+
+					types.Container{
+						Components: &[]types.AnyContainerComponent{
+							types.TextDisplayComponent{
+								Content: "## Hey!",
+							},
+
+							types.Section{
+								Components: &[]types.AnySectionComponent{
+									types.TextDisplayComponent{
+										Content: "You used the command **" + event.GetFullCommand() + "**",
 									},
-									Accessory: &types.ButtonComponent{
-										Style:    types.ButtonStylePrimary,
-										Label:    "Click Me!",
-										CustomID: "button_click_me",
-									},
+								},
+								Accessory: &types.ButtonComponent{
+									Style:    types.ButtonStylePrimary,
+									Label:    "Click Me!",
+									CustomID: "button_click_me",
 								},
 							},
 						},
 					},
 				},
-				Type: types.DiscordInteractionCallbackTypeChannelMessageWithSource,
 			})
 
 			if err != nil {
@@ -74,12 +128,9 @@ func main() {
 			bot.Logger.Debug().Msgf("Received button interaction with custom ID %s from %s", event.GetCustomID(), event.Member.User.DisplayName())
 
 			if event.GetCustomID() == "button_click_me" {
-				_, err := event.Reply(&types.DiscordInteractionResponse{
-					Data: &types.DiscordInteractionResponseData{
-						Content: "You clicked the button!",
-						Flags:   types.DiscordMessageFlagEphemeral,
-					},
-					Type: types.DiscordInteractionCallbackTypeChannelMessageWithSource,
+				_, err := event.Reply(&types.DiscordInteractionResponseDataDefault{
+					Content: "You clicked the button!",
+					Flags:   types.DiscordMessageFlagEphemeral,
 				})
 
 				if err != nil {

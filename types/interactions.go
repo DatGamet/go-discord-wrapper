@@ -371,7 +371,12 @@ type DiscordAllowedMentions struct {
 	RepliedUser *bool                         `json:"replied_user,omitempty"`
 }
 
-type DiscordInteractionResponseData struct {
+type AnyDiscordInteractionResponseData interface {
+	IsDiscordInteractionResponseData() bool
+	MarshalJSON() ([]byte, error)
+}
+
+type DiscordInteractionResponseDataDefault struct {
 	TTS             bool                    `json:"tts,omitempty"`
 	Content         string                  `json:"content,omitempty"`
 	Embeds          *[]DiscordEmbed         `json:"embeds,omitempty"`
@@ -384,16 +389,25 @@ type DiscordInteractionResponseData struct {
 	WithResponse bool                 `json:"with_response,omitempty"`
 }
 
+func (d *DiscordInteractionResponseDataDefault) IsDiscordInteractionResponseData() bool {
+	return true
+}
+
+func (d *DiscordInteractionResponseDataDefault) MarshalJSON() ([]byte, error) {
+	type Alias DiscordInteractionResponseDataDefault
+	return json.Marshal((*Alias)(d))
+}
+
 type DiscordInteractionResponse struct {
-	Type DiscordInteractionCallbackType  `json:"type"`
-	Data *DiscordInteractionResponseData `json:"data,omitempty"`
+	Type DiscordInteractionCallbackType    `json:"type"`
+	Data AnyDiscordInteractionResponseData `json:"data,omitempty"`
 }
 
 func (i *DiscordInteraction) DeferReply() error {
 	return nil
 }
 
-func (i *DiscordInteraction) EditReply(responseData *DiscordInteractionResponseData, clientID string) error {
+func (i *DiscordInteraction) EditReply(responseData *AnyDiscordInteractionResponseData, clientID string) error {
 	bodyBytes, err := json.Marshal(*responseData)
 	if err != nil {
 		return err
@@ -467,8 +481,54 @@ func (i *DiscordInteraction) DeleteReply(clientID string) error {
 	return nil
 }
 
-func (i *DiscordInteraction) Reply(responseData *DiscordInteractionResponse) (*any, error) {
-	bodyBytes, err := json.Marshal(*responseData)
+func (i *DiscordInteraction) ReplyWithModal(modal *Modal) error {
+	bodyBytes, err := json.Marshal(DiscordInteractionResponse{
+		Type: DiscordInteractionCallbackTypeModal,
+		Data: modal,
+	})
+	if err != nil {
+		return err
+	}
+
+	req, err := http.DefaultClient.Do(&http.Request{
+		Method: "POST",
+		URL: &url.URL{
+			Scheme: "https",
+			Host:   "discord.com",
+			Path:   "/api/v10/interactions/" + string(i.ID) + "/" + i.Token + "/callback",
+		},
+		Header: http.Header{
+			"Authorization": []string{"Bot " + ""},
+			"Content-Type":  []string{"application/json"},
+		},
+		Body: io.NopCloser(bytes.NewReader(bodyBytes)),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(req.Body)
+
+	if req.StatusCode != http.StatusNoContent {
+		var respErr map[string]interface{}
+		if err := json.NewDecoder(req.Body).Decode(&respErr); err != nil {
+			return err
+		}
+
+		return fmt.Errorf("expected 204 No Content, got %d: %v", req.StatusCode, respErr)
+	}
+
+	return nil
+}
+
+func (i *DiscordInteraction) Reply(data *DiscordInteractionResponseDataDefault) (*any, error) {
+	bodyBytes, err := json.Marshal(DiscordInteractionResponse{
+		Type: DiscordInteractionCallbackTypeChannelMessageWithSource,
+		Data: data,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -479,7 +539,7 @@ func (i *DiscordInteraction) Reply(responseData *DiscordInteractionResponse) (*a
 			Scheme:   "https",
 			Host:     "discord.com",
 			Path:     "/api/v10/interactions/" + string(i.ID) + "/" + i.Token + "/callback",
-			RawQuery: "with_response=" + fmt.Sprintf("%t", responseData.Data.WithResponse),
+			RawQuery: "with_response=" + fmt.Sprintf("%t", data.WithResponse),
 		},
 		Header: http.Header{
 			"Authorization": []string{"Bot " + ""},
@@ -496,7 +556,7 @@ func (i *DiscordInteraction) Reply(responseData *DiscordInteractionResponse) (*a
 		_ = Body.Close()
 	}(req.Body)
 
-	if !responseData.Data.WithResponse {
+	if !data.WithResponse {
 		if req.StatusCode != 204 {
 			var respErr map[string]interface{}
 			if err := json.NewDecoder(req.Body).Decode(&respErr); err != nil {
@@ -509,7 +569,7 @@ func (i *DiscordInteraction) Reply(responseData *DiscordInteractionResponse) (*a
 		return nil, nil
 	}
 
-	if responseData.Data.WithResponse && req.StatusCode != 200 {
+	if data.WithResponse && req.StatusCode != 200 {
 		var respErr map[string]interface{}
 		if err := json.NewDecoder(req.Body).Decode(&respErr); err != nil {
 			return nil, err

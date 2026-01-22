@@ -6,10 +6,10 @@ WARNING: The Wrapper is WIP and does not have a stable release. You might encoun
 - Connecting to the gateway and keeping a connecting alive (needs some refactoring)
 - INTERACTION_CREATE, GUILD_CREATE, READY and MESSAGE_CREATE events
 - Action Rows, Buttons, String Select Menus, User Select Menus, Mentionable Select Menus, Role Select Menus
-
-## TODO:
 - Modals
 - Components V2
+
+## TODO:
 - All events
 - Fix some parts of the session handling
 
