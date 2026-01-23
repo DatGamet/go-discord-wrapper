@@ -44,19 +44,17 @@ func main() {
 					{
 						Label:       "Input 1",
 						Description: "lololol",
-						Component: types.FileUploadComponent{
+						Component: &types.FileUploadComponent{
 							CustomID: "input_1",
 							Required: functions.PointerTo(false),
 						},
 					}, {
 						Label:       "Input 2",
 						Description: "adadadadadad",
-						Component: types.TextInputComponent{
-							CustomID:    "input_2",
-							Style:       types.TextInputStyleParagraph,
-							Required:    true,
-							Value:       "123456",
-							Placeholder: ":D",
+						Component: &types.TextInputComponent{
+							CustomID: "input_2",
+							Style:    types.TextInputStyleParagraph,
+							Required: functions.PointerTo(false),
 						},
 					},
 				},
@@ -73,15 +71,15 @@ func main() {
 			_, err := event.Reply(&types.DiscordInteractionResponseDataDefault{
 				Flags: types.DiscordMessageFlagEphemeral | types.DiscordMessageFlagIsComponentsV2,
 				Components: &[]types.AnyComponent{
-					types.TextDisplayComponent{
+					&types.TextDisplayComponent{
 						Content: "Hello, " + event.Member.User.DisplayName() + "!",
 					},
 
-					types.SeparatorComponent{
+					&types.SeparatorComponent{
 						SeparatorComponentSpacing: types.SeparatorComponentSpacingSmall,
 					},
 
-					types.MediaGalleryComponent{
+					&types.MediaGalleryComponent{
 						Items: &[]types.MediaGalleryItem{
 							{
 								Media: &types.UnfurledMediaItem{
@@ -96,15 +94,15 @@ func main() {
 						},
 					},
 
-					types.Container{
+					&types.Container{
 						Components: &[]types.AnyContainerComponent{
-							types.TextDisplayComponent{
+							&types.TextDisplayComponent{
 								Content: "## Hey!",
 							},
 
-							types.Section{
+							&types.Section{
 								Components: &[]types.AnySectionComponent{
-									types.TextDisplayComponent{
+									&types.TextDisplayComponent{
 										Content: "You used the command **" + event.GetFullCommand() + "**",
 									},
 								},

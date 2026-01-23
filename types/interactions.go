@@ -673,8 +673,72 @@ func (d *DiscordInteractionDataAutocomplete) GetType() DiscordInteractionDataTyp
 }
 
 type DiscordInteractionDataModalSubmit struct {
-	CustomID string               `json:"custom_id"`
-	Resolved *DiscordResolvedData `json:"resolved,omitempty"`
+	CustomID   string                     `json:"custom_id"`
+	Resolved   *DiscordResolvedData       `json:"resolved,omitempty"`
+	Components *[]ComponentLabelComponent `json:"components,omitempty"`
+}
+
+type ComponentLabelComponent struct {
+	Type        DiscordComponentType             `json:"type"`
+	ID          *int                             `json:"id,omitempty"`
+	Label       *string                          `json:"label"`
+	Description *string                          `json:"description,omitempty"`
+	Component   *AnyComponentInteractionResponse `json:"component,omitempty"`
+}
+
+func (l *ComponentLabelComponent) UnmarshalJSON(data []byte) error {
+	type Alias ComponentLabelComponent
+	raw := &struct {
+		*Alias
+		Component *json.RawMessage `json:"component,omitempty"`
+	}{
+		Alias: (*Alias)(l),
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	var probe struct {
+		Type DiscordComponentType `json:"type"`
+	}
+	if err := json.Unmarshal(*raw.Component, &probe); err != nil {
+		return err
+	}
+
+	var c AnyComponentInteractionResponse
+
+	switch probe.Type {
+	case DiscordComponentTypeUserSelectMenu:
+		c = &UserSelectComponentInteractionResponse{}
+	case DiscordComponentTypeRoleSelectMenu:
+		c = &RoleComponentInteractionResponse{}
+	case DiscordComponentTypeStringSelectMenu:
+		c = &StringSelectComponentInteractionResponse{}
+	case DiscordComponentTypeChannelSelect:
+		c = &ChannelComponentInteractionResponse{}
+	case DiscordComponentTypeMentionableMenu:
+		c = &MentionableComponentInteractionResponse{}
+	case DiscordComponentTypeTextDisplay:
+		c = &TextDisplayComponentInteractionResponse{}
+	case DiscordComponentTypeTextInput:
+		c = &TextInputComponentInteractionResponse{}
+	case DiscordComponentTypeFileUpload:
+		c = &FileUploadComponentInteractionResponse{}
+	case DiscordComponentTypeLabel:
+		c = &LabelComponentInteractionResponse{}
+
+	default:
+		return fmt.Errorf("unknown interaction component type: %d", probe.Type)
+	}
+
+	if err := json.Unmarshal(*raw.Component, c); err != nil {
+		return err
+	}
+
+	l.Component = &c
+
+	return nil
 }
 
 func (d *DiscordInteractionDataModalSubmit) GetType() DiscordInteractionDataType {

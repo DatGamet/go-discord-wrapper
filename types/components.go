@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"errors"
 )
 
 type DiscordComponentType int
@@ -37,6 +38,7 @@ func (c DiscordComponentType) IsAnySelectMenu() bool {
 type AnyComponent interface {
 	GetType() DiscordComponentType
 	MarshalJSON() ([]byte, error)
+	UnmarshalJSON([]byte) error
 }
 
 type ActionRow struct {
@@ -96,11 +98,11 @@ func (a *ActionRow) UnmarshalJSON(data []byte) error {
 
 		switch probe.Type {
 		case DiscordComponentTypeButton:
-			var b ButtonComponent
+			var b *ButtonComponent
 			if err := json.Unmarshal(c, &b); err != nil {
 				return err
 			}
-			a.Components = append(a.Components, &b)
+			a.Components = append(a.Components, b)
 		}
 	}
 
@@ -130,25 +132,39 @@ type ButtonComponent struct {
 	Disabled bool                 `json:"disabled,omitempty"`
 }
 
-func (b ButtonComponent) MarshalJSON() ([]byte, error) {
+func (b *ButtonComponent) UnmarshalJSON(data []byte) error {
+	type Alias ButtonComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*b = ButtonComponent(*raw.Alias)
+	return nil
+}
+
+func (b *ButtonComponent) MarshalJSON() ([]byte, error) {
 	b.Type = DiscordComponentTypeButton
 	type Alias ButtonComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(b),
+		Alias: (*Alias)(b),
 	})
 }
 
-func (b ButtonComponent) GetType() DiscordComponentType {
+func (b *ButtonComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeButton
 }
 
-func (b ButtonComponent) IsAnySectionAccessory() bool {
+func (b *ButtonComponent) IsAnySectionAccessory() bool {
 	return true
 }
 
-func (b ButtonComponent) IsAnyContainerAccessory() bool {
+func (b *ButtonComponent) IsAnyContainerAccessory() bool {
 	return true
 }
 
@@ -164,22 +180,36 @@ type StringSelectMenuComponent struct {
 	Disabled    bool                               `json:"disabled,omitempty"`
 }
 
-func (s StringSelectMenuComponent) IsAnyContainerAccessory() bool {
+func (s *StringSelectMenuComponent) IsAnyContainerAccessory() bool {
 	return true
 }
 
-func (s StringSelectMenuComponent) MarshalJSON() ([]byte, error) {
+func (s *StringSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	s.Type = DiscordComponentTypeStringSelectMenu
 	type Alias StringSelectMenuComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(s),
+		Alias: (*Alias)(s),
 	})
 }
 
-func (s StringSelectMenuComponent) GetType() DiscordComponentType {
+func (s *StringSelectMenuComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeStringSelectMenu
+}
+
+func (s *StringSelectMenuComponent) UnmarshalJSON(data []byte) error {
+	type Alias StringSelectMenuComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*s = StringSelectMenuComponent(*raw.Alias)
+	return nil
 }
 
 type StringSelectMenuComponentOption struct {
@@ -190,7 +220,7 @@ type StringSelectMenuComponentOption struct {
 	Default     bool          `json:"default,omitempty"`
 }
 
-func (s StringSelectMenuComponentOption) IsAnyLabelComponent() bool {
+func (s *StringSelectMenuComponent) IsAnyLabelComponent() bool {
 	return true
 }
 
@@ -206,25 +236,39 @@ type UserSelectMenuComponent struct {
 	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
 }
 
-func (u UserSelectMenuComponent) IsAnyContainerAccessory() bool {
+func (u *UserSelectMenuComponent) IsAnyContainerAccessory() bool {
 	return true
 }
 
-func (u UserSelectMenuComponent) MarshalJSON() ([]byte, error) {
+func (u *UserSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	u.Type = DiscordComponentTypeUserSelectMenu
 	type Alias UserSelectMenuComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(u),
+		Alias: (*Alias)(u),
 	})
 }
 
-func (u UserSelectMenuComponent) GetType() DiscordComponentType {
+func (u *UserSelectMenuComponent) UnmarshalJSON(data []byte) error {
+	type Alias UserSelectMenuComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*u = UserSelectMenuComponent(*raw.Alias)
+	return nil
+}
+
+func (u *UserSelectMenuComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeUserSelectMenu
 }
 
-func (u UserSelectMenuComponent) IsAnyLabelComponent() bool {
+func (u *UserSelectMenuComponent) IsAnyLabelComponent() bool {
 	return true
 }
 
@@ -240,25 +284,39 @@ type RoleSelectMenuComponent struct {
 	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
 }
 
-func (r RoleSelectMenuComponent) IsAnyContainerAccessory() bool {
+func (r *RoleSelectMenuComponent) IsAnyContainerAccessory() bool {
 	return true
 }
 
-func (r RoleSelectMenuComponent) MarshalJSON() ([]byte, error) {
+func (r *RoleSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	r.Type = DiscordComponentTypeRoleSelectMenu
 	type Alias UserSelectMenuComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(r),
+		Alias: (*Alias)(r),
 	})
 }
 
-func (r RoleSelectMenuComponent) GetType() DiscordComponentType {
+func (r *RoleSelectMenuComponent) UnmarshalJSON(data []byte) error {
+	type Alias RoleSelectMenuComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*r = RoleSelectMenuComponent(*raw.Alias)
+	return nil
+}
+
+func (r *RoleSelectMenuComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeRoleSelectMenu
 }
 
-func (r RoleSelectMenuComponent) IsAnyLabelComponent() bool {
+func (r *RoleSelectMenuComponent) IsAnyLabelComponent() bool {
 	return true
 }
 
@@ -274,25 +332,39 @@ type MentionableSelectMenuComponent struct {
 	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
 }
 
-func (m MentionableSelectMenuComponent) IsAnyContainerAccessory() bool {
+func (m *MentionableSelectMenuComponent) IsAnyContainerAccessory() bool {
 	return true
 }
 
-func (m MentionableSelectMenuComponent) IsAnyLabelComponent() bool {
+func (m *MentionableSelectMenuComponent) UnmarshalJSON(data []byte) error {
+	type Alias MentionableSelectMenuComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*m = MentionableSelectMenuComponent(*raw.Alias)
+	return nil
+}
+
+func (m *MentionableSelectMenuComponent) IsAnyLabelComponent() bool {
 	return true
 }
 
-func (m MentionableSelectMenuComponent) MarshalJSON() ([]byte, error) {
+func (m *MentionableSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	m.Type = DiscordComponentTypeMentionableMenu
 	type Alias MentionableSelectMenuComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(m),
+		Alias: (*Alias)(m),
 	})
 }
 
-func (m MentionableSelectMenuComponent) GetType() DiscordComponentType {
+func (m *MentionableSelectMenuComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeMentionableMenu
 }
 
@@ -308,30 +380,40 @@ type ChannelSelectMenuComponent struct {
 	DefaultValues *[]SelectDefaultValue `json:"default_values,omitempty"`
 }
 
-func (c ChannelSelectMenuComponent) IsAnyContainerAccessory() bool {
+func (c *ChannelSelectMenuComponent) IsAnyContainerAccessory() bool {
 	return true
 }
 
-func (c ChannelSelectMenuComponent) MarshalJSON() ([]byte, error) {
+func (c *ChannelSelectMenuComponent) UnmarshalJSON(data []byte) error {
+	type Alias ChannelSelectMenuComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*c = ChannelSelectMenuComponent(*raw.Alias)
+	return nil
+}
+
+func (c *ChannelSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	c.Type = DiscordComponentTypeChannelSelect
 	type Alias ChannelSelectMenuComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(c),
+		Alias: (*Alias)(c),
 	})
 }
 
-func (c ChannelSelectMenuComponent) GetType() DiscordComponentType {
+func (c *ChannelSelectMenuComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeChannelSelect
 }
 
-func (c ChannelSelectMenuComponent) IsAnyLabelComponent() bool {
+func (c *ChannelSelectMenuComponent) IsAnyLabelComponent() bool {
 	return true
-}
-
-func (c ChannelSelectMenuComponent) RoleSelectMenuComponent() DiscordComponentType {
-	return DiscordComponentTypeRoleSelectMenu
 }
 
 type SelectDefaultValueType string
@@ -349,8 +431,44 @@ type Section struct {
 	Accessory  AnySectionAccessory    `json:"accessory,omitempty"`
 }
 
-func (s Section) IsAnyContainerComponent() bool {
+func (s *Section) IsAnyContainerComponent() bool {
 	return true
+}
+
+func (s *Section) UnmarshalJSON(data []byte) error {
+	type Alias Section
+
+	var raw struct {
+		Alias
+		Components []json.RawMessage `json:"components"`
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*s = Section(raw.Alias)
+
+	for _, c := range raw.Components {
+		var probe struct {
+			Type DiscordComponentType `json:"type"`
+		}
+
+		if err := json.Unmarshal(c, &probe); err != nil {
+			return err
+		}
+
+		switch probe.Type {
+		case DiscordComponentTypeTextDisplay:
+			var t *TextDisplayComponent
+			if err := json.Unmarshal(c, &t); err != nil {
+				return err
+			}
+			*s.Components = append(*s.Components, t)
+		}
+	}
+
+	return nil
 }
 
 type AnySectionComponent interface {
@@ -363,25 +481,39 @@ type TextDisplayComponent struct {
 	Content string               `json:"content"`
 }
 
-func (t TextDisplayComponent) IsAnyContainerComponent() bool {
+func (t *TextDisplayComponent) UnmarshalJSON(data []byte) error {
+	type Alias TextDisplayComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*t = TextDisplayComponent(*raw.Alias)
+	return nil
+}
+
+func (t *TextDisplayComponent) IsAnyContainerComponent() bool {
 	return true
 }
 
-func (t TextDisplayComponent) GetType() DiscordComponentType {
+func (t *TextDisplayComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeTextDisplay
 }
 
-func (t TextDisplayComponent) MarshalJSON() ([]byte, error) {
+func (t *TextDisplayComponent) MarshalJSON() ([]byte, error) {
 	t.Type = DiscordComponentTypeTextDisplay
 	type Alias TextDisplayComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(t),
+		Alias: (*Alias)(t),
 	})
 }
 
-func (t TextDisplayComponent) IsAnySectionComponent() bool {
+func (t *TextDisplayComponent) IsAnySectionComponent() bool {
 	return true
 }
 
@@ -406,21 +538,35 @@ type ThumbnailComponent struct {
 	Media       *UnfurledMediaItem   `json:"media,omitempty"`
 }
 
-func (t ThumbnailComponent) MarshalJSON() ([]byte, error) {
+func (t *ThumbnailComponent) UnmarshalJSON(data []byte) error {
+	type Alias ThumbnailComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*t = ThumbnailComponent(*raw.Alias)
+	return nil
+}
+
+func (t *ThumbnailComponent) MarshalJSON() ([]byte, error) {
 	t.Type = DiscordComponentTypeThumbnail
 	type Alias ThumbnailComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(t),
+		Alias: (*Alias)(t),
 	})
 }
 
-func (t ThumbnailComponent) GetType() DiscordComponentType {
+func (t *ThumbnailComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeThumbnail
 }
 
-func (t ThumbnailComponent) IsAnySectionAccessory() bool {
+func (t *ThumbnailComponent) IsAnySectionAccessory() bool {
 	return true
 }
 
@@ -431,17 +577,17 @@ type ImageDisplayComponent struct {
 	Alt    *string              `json:"alt,omitempty"`
 }
 
-func (s Section) MarshalJSON() ([]byte, error) {
+func (s *Section) MarshalJSON() ([]byte, error) {
 	s.Type = DiscordComponentTypeSection
 	type Alias Section
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(s),
+		Alias: (*Alias)(s),
 	})
 }
 
-func (s Section) GetType() DiscordComponentType {
+func (s *Section) GetType() DiscordComponentType {
 	return DiscordComponentTypeSection
 }
 
@@ -453,17 +599,91 @@ type Container struct {
 	Spoiler     bool                     `json:"spoiler,omitempty"`
 }
 
-func (c Container) GetType() DiscordComponentType {
+func (c *Container) UnmarshalJSON(data []byte) error {
+	type Alias Container
+
+	var raw struct {
+		*Alias
+		Components []json.RawMessage `json:"components"`
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*c = Container(*raw.Alias)
+
+	for _, comp := range raw.Components {
+		var probe struct {
+			Type DiscordComponentType `json:"type"`
+		}
+
+		if err := json.Unmarshal(comp, &probe); err != nil {
+			return err
+		}
+
+		switch probe.Type {
+		case DiscordComponentTypeMediaGallery:
+			var m *MediaGalleryComponent
+			if err := json.Unmarshal(comp, &m); err != nil {
+				return err
+			}
+			*c.Components = append(*c.Components, m)
+		case DiscordComponentTypeFileDisplay:
+			var f *FileComponent
+			if err := json.Unmarshal(comp, &f); err != nil {
+				return err
+			}
+			*c.Components = append(*c.Components, f)
+		case DiscordComponentTypeSeparator:
+			var s *SeparatorComponent
+			if err := json.Unmarshal(comp, &s); err != nil {
+				return err
+			}
+			*c.Components = append(*c.Components, s)
+		case DiscordComponentTypeTextInput:
+			var t *TextInputComponent
+			if err := json.Unmarshal(comp, &t); err != nil {
+				return err
+			}
+			*c.Components = append(*c.Components, t)
+		case DiscordComponentTypeActionRow:
+			var a *ActionRow
+			if err := json.Unmarshal(comp, &a); err != nil {
+				return err
+			}
+			*c.Components = append(*c.Components, a)
+		case DiscordComponentTypeTextDisplay:
+			var t *TextDisplayComponent
+			if err := json.Unmarshal(comp, &t); err != nil {
+				return err
+			}
+			*c.Components = append(*c.Components, t)
+		case DiscordComponentTypeSection:
+			var s *Section
+			if err := json.Unmarshal(comp, &s); err != nil {
+				return err
+			}
+			*c.Components = append(*c.Components, s)
+		default:
+			return errors.New("unknown container component type" + string(rune(probe.Type)))
+		}
+	}
+
+	return nil
+}
+
+func (c *Container) GetType() DiscordComponentType {
 	return DiscordComponentTypeContainer
 }
 
-func (c Container) MarshalJSON() ([]byte, error) {
+func (c *Container) MarshalJSON() ([]byte, error) {
 	c.Type = DiscordComponentTypeContainer
 	type Alias Container
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(c),
+		Alias: (*Alias)(c),
 	})
 }
 
@@ -479,21 +699,35 @@ type MediaGalleryComponent struct {
 	Items *[]MediaGalleryItem  `json:"items"`
 }
 
-func (m MediaGalleryComponent) MarshalJSON() ([]byte, error) {
+func (m *MediaGalleryComponent) UnmarshalJSON(data []byte) error {
+	type Alias MediaGalleryComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*m = MediaGalleryComponent(*raw.Alias)
+	return nil
+}
+
+func (m *MediaGalleryComponent) MarshalJSON() ([]byte, error) {
 	m.Type = DiscordComponentTypeMediaGallery
 	type Alias MediaGalleryComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(m),
+		Alias: (*Alias)(m),
 	})
 }
 
-func (m MediaGalleryComponent) GetType() DiscordComponentType {
+func (m *MediaGalleryComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeMediaGallery
 }
 
-func (m MediaGalleryComponent) IsAnyContainerComponent() bool {
+func (m *MediaGalleryComponent) IsAnyContainerComponent() bool {
 	return true
 }
 
@@ -512,21 +746,35 @@ type FileComponent struct {
 	File    *UnfurledMediaItem   `json:"file,omitempty"`
 }
 
-func (f FileComponent) MarshalJSON() ([]byte, error) {
+func (f *FileComponent) UnmarshalJSON(data []byte) error {
+	type Alias FileComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*f = FileComponent(*raw.Alias)
+	return nil
+}
+
+func (f *FileComponent) MarshalJSON() ([]byte, error) {
 	f.Type = DiscordComponentTypeFileDisplay
 	type Alias FileComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(f),
+		Alias: (*Alias)(f),
 	})
 }
 
-func (f FileComponent) GetType() DiscordComponentType {
+func (f *FileComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeFileDisplay
 }
 
-func (f FileComponent) IsAnyContainerComponent() bool {
+func (f *FileComponent) IsAnyContainerComponent() bool {
 	return true
 }
 
@@ -544,21 +792,35 @@ type SeparatorComponent struct {
 	SeparatorComponentSpacing SeparatorComponentSpacing `json:"spacing,omitempty"`
 }
 
-func (s SeparatorComponent) MarshalJSON() ([]byte, error) {
+func (s *SeparatorComponent) UnmarshalJSON(data []byte) error {
+	type Alias SeparatorComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*s = SeparatorComponent(*raw.Alias)
+	return nil
+}
+
+func (s *SeparatorComponent) MarshalJSON() ([]byte, error) {
 	s.Type = DiscordComponentTypeSeparator
 	type Alias SeparatorComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(s),
+		Alias: (*Alias)(s),
 	})
 }
 
-func (s SeparatorComponent) GetType() DiscordComponentType {
+func (s *SeparatorComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeSeparator
 }
 
-func (s SeparatorComponent) IsAnyContainerComponent() bool {
+func (s *SeparatorComponent) IsAnyContainerComponent() bool {
 	return true
 }
 
@@ -570,17 +832,90 @@ type LabelComponent struct {
 	Component   AnyChildComponent    `json:"component,omitempty"`
 }
 
-func (l LabelComponent) MarshalJSON() ([]byte, error) {
+func (l *LabelComponent) UnmarshalJSON(data []byte) error {
+	type Alias LabelComponent
+	var raw struct {
+		*Alias
+		Component json.RawMessage `json:"component,omitempty"`
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*l = LabelComponent(*raw.Alias)
+
+	if raw.Component != nil {
+		var probe struct {
+			Type DiscordComponentType `json:"type"`
+		}
+
+		if err := json.Unmarshal(raw.Component, &probe); err != nil {
+			return err
+		}
+
+		switch probe.Type {
+		case DiscordComponentTypeTextInput:
+			var t *TextInputComponent
+			if err := json.Unmarshal(raw.Component, &t); err != nil {
+				return err
+			}
+			l.Component = t
+		case DiscordComponentTypeFileUpload:
+			var f *FileUploadComponent
+			if err := json.Unmarshal(raw.Component, &f); err != nil {
+				return err
+			}
+			l.Component = f
+		case DiscordComponentTypeStringSelectMenu:
+			var s *StringSelectMenuComponent
+			if err := json.Unmarshal(raw.Component, &s); err != nil {
+				return err
+			}
+			l.Component = s
+		case DiscordComponentTypeUserSelectMenu:
+			var u *UserSelectMenuComponent
+			if err := json.Unmarshal(raw.Component, &u); err != nil {
+				return err
+			}
+			l.Component = u
+		case DiscordComponentTypeRoleSelectMenu:
+			var r *RoleSelectMenuComponent
+			if err := json.Unmarshal(raw.Component, &r); err != nil {
+				return err
+			}
+			l.Component = r
+		case DiscordComponentTypeMentionableMenu:
+			var m *MentionableSelectMenuComponent
+			if err := json.Unmarshal(raw.Component, &m); err != nil {
+				return err
+			}
+			l.Component = m
+		case DiscordComponentTypeChannelSelect:
+			var c *ChannelSelectMenuComponent
+			if err := json.Unmarshal(raw.Component, &c); err != nil {
+				return err
+			}
+			l.Component = c
+		default:
+			return errors.New("unknown component type" + string(rune(probe.Type)))
+		}
+	}
+
+	return nil
+}
+
+func (l *LabelComponent) MarshalJSON() ([]byte, error) {
 	l.Type = DiscordComponentTypeLabel
 	type Alias LabelComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(l),
+		Alias: (*Alias)(l),
 	})
 }
 
-func (l LabelComponent) GetType() DiscordComponentType {
+func (l *LabelComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeLabel
 }
 
@@ -592,6 +927,357 @@ type Modal struct {
 	Title      string            `json:"title"`
 	CustomID   string            `json:"custom_id"`
 	Components *[]LabelComponent `json:"components"`
+}
+
+type AnyComponentInteractionResponse interface {
+	IsDiscordInteractionResponseDataComponent() bool
+	MarshalJSON() ([]byte, error)
+	UnmarshalJSON([]byte) error
+}
+
+type StringSelectComponentInteractionResponse struct {
+	Type          DiscordComponentType `json:"type"`
+	Values        []string             `json:"values"`
+	ID            *int                 `json:"id,omitempty"`
+	CustomID      string               `json:"custom_id,omitempty"`
+	ComponentType DiscordComponentType `json:"component_type"`
+}
+
+func (s *StringSelectComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (s *StringSelectComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	s.ComponentType = DiscordComponentTypeStringSelectMenu
+	s.Type = DiscordComponentTypeStringSelectMenu
+
+	type Alias StringSelectComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(s),
+	})
+}
+
+func (s *StringSelectComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias StringSelectComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*s = StringSelectComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type TextInputComponentInteractionResponse struct {
+	Type     DiscordComponentType `json:"type"`
+	Value    string               `json:"value"`
+	ID       *int                 `json:"id,omitempty"`
+	CustomID string               `json:"custom_id"`
+}
+
+func (t *TextInputComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (t *TextInputComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	t.Type = DiscordComponentTypeTextInput
+
+	type Alias TextInputComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(t),
+	})
+}
+
+func (t *TextInputComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias TextInputComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*t = TextInputComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type UserSelectComponentInteractionResponse struct {
+	Type          DiscordComponentType `json:"type"`
+	Values        []DiscordSnowflake   `json:"values"`
+	ID            *int                 `json:"id,omitempty"`
+	CustomID      string               `json:"custom_id,omitempty"`
+	ComponentType DiscordComponentType `json:"component_type"`
+	Resolved      *DiscordResolvedData `json:"resolved,omitempty"`
+}
+
+func (u *UserSelectComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (u *UserSelectComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	u.ComponentType = DiscordComponentTypeRoleSelectMenu
+	u.Type = DiscordComponentTypeRoleSelectMenu
+
+	type Alias UserSelectComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(u),
+	})
+}
+
+func (u *UserSelectComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias UserSelectComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*u = UserSelectComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type RoleComponentInteractionResponse struct {
+	Type          DiscordComponentType `json:"type"`
+	Values        []DiscordSnowflake   `json:"values"`
+	ID            *int                 `json:"id,omitempty"`
+	CustomID      string               `json:"custom_id,omitempty"`
+	ComponentType DiscordComponentType `json:"component_type"`
+	Resolved      *DiscordResolvedData `json:"resolved,omitempty"`
+}
+
+func (r *RoleComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (r *RoleComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	r.ComponentType = DiscordComponentTypeRoleSelectMenu
+	r.Type = DiscordComponentTypeRoleSelectMenu
+
+	type Alias RoleComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(r),
+	})
+}
+
+func (r *RoleComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias RoleComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*r = RoleComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type MentionableComponentInteractionResponse struct {
+	Type          DiscordComponentType `json:"type"`
+	Values        []DiscordSnowflake   `json:"values"`
+	ID            *int                 `json:"id,omitempty"`
+	CustomID      string               `json:"custom_id,omitempty"`
+	ComponentType DiscordComponentType `json:"component_type"`
+	Resolved      *DiscordResolvedData `json:"resolved,omitempty"`
+}
+
+func (m *MentionableComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (m *MentionableComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	m.ComponentType = DiscordComponentTypeMentionableMenu
+	m.Type = DiscordComponentTypeMentionableMenu
+
+	type Alias MentionableComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(m),
+	})
+}
+
+func (m *MentionableComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias MentionableComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*m = MentionableComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type LabelComponentInteractionResponse struct {
+	Type     DiscordComponentType `json:"type"`
+	Value    string               `json:"values"`
+	ID       *int                 `json:"id,omitempty"`
+	CustomID string               `json:"custom_id,omitempty"`
+}
+
+func (l *LabelComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (l *LabelComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	l.Type = DiscordComponentTypeLabel
+
+	type Alias LabelComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(l),
+	})
+}
+
+func (l *LabelComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias LabelComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*l = LabelComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type TextDisplayComponentInteractionResponse struct {
+	Type DiscordComponentType `json:"type"`
+	ID   *int                 `json:"id,omitempty"`
+}
+
+func (t *TextDisplayComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (t *TextDisplayComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	t.Type = DiscordComponentTypeTextDisplay
+
+	type Alias TextDisplayComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(t),
+	})
+}
+
+func (t *TextDisplayComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias TextDisplayComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*t = TextDisplayComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type FileUploadComponentInteractionResponse struct {
+	Type     DiscordComponentType `json:"type"`
+	ID       *int                 `json:"id,omitempty"`
+	CustomID string               `json:"custom_id"`
+	Values   []DiscordSnowflake   `json:"values"`
+}
+
+func (f *FileUploadComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (f *FileUploadComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	f.Type = DiscordComponentTypeFileUpload
+
+	type Alias FileUploadComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(f),
+	})
+}
+
+func (f *FileUploadComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias FileUploadComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*f = FileUploadComponentInteractionResponse(*raw.Alias)
+	return nil
+}
+
+type ChannelComponentInteractionResponse struct {
+	Type          DiscordComponentType `json:"type"`
+	Values        []DiscordSnowflake   `json:"values"`
+	ID            *int                 `json:"id,omitempty"`
+	CustomID      string               `json:"custom_id,omitempty"`
+	ComponentType DiscordComponentType `json:"component_type"`
+	Resolved      *DiscordResolvedData `json:"resolved,omitempty"`
+}
+
+func (c *ChannelComponentInteractionResponse) IsDiscordInteractionResponseDataComponent() bool {
+	return true
+}
+
+func (c *ChannelComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	c.ComponentType = DiscordComponentTypeChannelSelect
+	c.Type = DiscordComponentTypeChannelSelect
+
+	type Alias ChannelComponentInteractionResponse
+
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	})
+}
+
+func (c *ChannelComponentInteractionResponse) UnmarshalJSON(data []byte) error {
+	type Alias ChannelComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*c = ChannelComponentInteractionResponse(*raw.Alias)
+	return nil
 }
 
 func (m Modal) IsDiscordInteractionResponseData() bool {
@@ -621,30 +1307,44 @@ type TextInputComponent struct {
 	Style       TextInputStyle       `json:"style"`
 	MinLength   *int                 `json:"min_length,omitempty"`
 	MaxLength   *int                 `json:"max_length,omitempty"`
-	Required    bool                 `json:"required,omitempty"`
+	Required    *bool                `json:"required,omitempty"`
 	Value       string               `json:"value,omitempty"`
 	Placeholder string               `json:"placeholder,omitempty"`
 }
 
-func (t TextInputComponent) MarshalJSON() ([]byte, error) {
+func (t *TextInputComponent) MarshalJSON() ([]byte, error) {
 	t.Type = DiscordComponentTypeTextInput
 	type Alias TextInputComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(t),
+		Alias: (*Alias)(t),
 	})
 }
 
-func (t TextInputComponent) GetType() DiscordComponentType {
+func (t *TextInputComponent) UnmarshalJSON(data []byte) error {
+	type Alias TextInputComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*t = TextInputComponent(*raw.Alias)
+	return nil
+}
+
+func (t *TextInputComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeTextInput
 }
 
-func (t TextInputComponent) IsAnyContainerComponent() bool {
+func (t *TextInputComponent) IsAnyContainerComponent() bool {
 	return true
 }
 
-func (t TextInputComponent) IsAnyLabelComponent() bool {
+func (t *TextInputComponent) IsAnyLabelComponent() bool {
 	return true
 }
 
@@ -657,21 +1357,35 @@ type FileUploadComponent struct {
 	MaxValues *int                 `json:"max_values,omitempty"`
 }
 
-func (f FileUploadComponent) MarshalJSON() ([]byte, error) {
+func (f *FileUploadComponent) MarshalJSON() ([]byte, error) {
 	f.Type = DiscordComponentTypeFileUpload
 	type Alias FileUploadComponent
 	return json.Marshal(&struct {
-		Alias
+		*Alias
 	}{
-		Alias: (Alias)(f),
+		Alias: (*Alias)(f),
 	})
 }
 
-func (f FileUploadComponent) GetType() DiscordComponentType {
+func (f *FileUploadComponent) UnmarshalJSON(data []byte) error {
+	type Alias FileUploadComponent
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	*f = FileUploadComponent(*raw.Alias)
+	return nil
+}
+
+func (f *FileUploadComponent) GetType() DiscordComponentType {
 	return DiscordComponentTypeFileUpload
 }
 
-func (f FileUploadComponent) IsAnyLabelComponent() bool {
+func (f *FileUploadComponent) IsAnyLabelComponent() bool {
 	return true
 }
 
