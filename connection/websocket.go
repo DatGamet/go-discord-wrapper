@@ -8,7 +8,25 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func NewWebsocket(bot *DiscordClient, host string, isReconnect bool) (*websocket.Conn, error) {
+type Websocket struct {
+	Connection *websocket.Conn
+
+	HeartbeatInterval time.Duration
+
+	LastHeartBeat *time.Time
+
+	SessionID *string
+
+	LastEventNum *int
+
+	ReconnectURL *string
+
+	Closed chan struct{}
+
+	Ready chan struct{}
+}
+
+func NewWebsocket(bot *DiscordClient, host string, isReconnect bool, lastEventNum *int) (*Websocket, error) {
 	c, _, err := websocket.DefaultDialer.Dial(host+"?v=10&encoding=json", nil)
 	if err != nil {
 		return nil, err
@@ -29,38 +47,52 @@ func NewWebsocket(bot *DiscordClient, host string, isReconnect bool) (*websocket
 		return nil, err
 	}
 
+	ws := &Websocket{
+		Connection:        c,
+		HeartbeatInterval: time.Millisecond * time.Duration(hello.HeartbeatInterval),
+		Closed:            make(chan struct{}),
+		Ready:             make(chan struct{}),
+	}
+
+	bot.Logger.Info().Msgf("Connected to Discord gateway, heartbeat interval: %f ms", hello.HeartbeatInterval)
+
 	go func() {
 		ticker := time.NewTicker(time.Millisecond * time.Duration(hello.HeartbeatInterval))
 		defer ticker.Stop()
-		for range ticker.C {
-			if bot.LastHeartbeat != nil && !bot.LastHeartbeat.IsZero() &&
-				time.Since(*bot.LastHeartbeat) > time.Duration(hello.HeartbeatInterval)*time.Millisecond*2 {
 
-				bot.Logger.Warn().Msg("Heartbeat ACK timeout, reconnecting")
-				_ = c.Close()
-				_ = bot.reconnect(true)
-				return
+		go func() {
+			for range ticker.C {
+				if ws.LastHeartBeat != nil && !ws.LastHeartBeat.IsZero() &&
+					time.Since(*ws.LastHeartBeat) > time.Duration(hello.HeartbeatInterval)*time.Millisecond*2 {
+
+					bot.Logger.Warn().Msg("Heartbeat ACK timeout, reconnecting")
+					_ = bot.reconnect(true)
+					return
+				}
+
+				if err := c.WriteJSON(types.Payload{
+					Op: 1,
+					D:  nil,
+				}); err != nil {
+					bot.Logger.Err(err).Msg("Failed to send heartbeat")
+					return
+				}
+
+				bot.Logger.Debug().Msg("Heartbeat sent")
 			}
+		}()
 
-			if err := c.WriteJSON(types.Payload{
-				Op: 1,
-				D:  nil,
-			}); err != nil {
-				bot.Logger.Err(err).Msg("Failed to send heartbeat")
-				return
-			}
-
-			bot.Logger.Debug().Msg("Heartbeat sent")
-		}
+		<-ws.Closed
+		return
 	}()
 
-	if isReconnect {
+	if isReconnect && lastEventNum != nil {
 		if err := c.WriteJSON(map[string]interface{}{
 			"op": 6,
 			"d": map[string]interface{}{
 				"token":      *bot.Token,
-				"session_id": bot.SessionID,
-				"seq":        *bot.LastEventNum,
+				"session_id": ws.SessionID,
+				"seq":        *lastEventNum,
 			},
 		}); err != nil {
 			return nil, err
@@ -73,8 +105,8 @@ func NewWebsocket(bot *DiscordClient, host string, isReconnect bool) (*websocket
 				"intents": *bot.Intents,
 				"properties": map[string]string{
 					"$os":      "windows",
-					"$browser": "dat_bot_go",
-					"$device":  "dat_bot_go",
+					"$browser": "https://github.com/DatGamet/go-discord-wrapper@alpha",
+					"$device":  "https://github.com/DatGamet/go-discord-wrapper@alpha",
 				},
 			},
 		}
@@ -88,11 +120,11 @@ func NewWebsocket(bot *DiscordClient, host string, isReconnect bool) (*websocket
 		}
 	}
 
-	return c, nil
+	return ws, nil
 }
 
-func (d *DiscordClient) connectWebsocket(url string, isReconnect bool) error {
-	ws, err := NewWebsocket(d, url, isReconnect)
+func (d *DiscordClient) connectWebsocket(url string, isReconnect bool, lastEventNum *int) error {
+	ws, err := NewWebsocket(d, url, isReconnect, lastEventNum)
 	if err != nil {
 		return err
 	}
@@ -104,12 +136,14 @@ func (d *DiscordClient) connectWebsocket(url string, isReconnect bool) error {
 func (d *DiscordClient) reconnect(freshConnect bool) error {
 	d.Logger.Warn().Msg("Reconnecting to Discord gateway")
 
+	lastEventNum := d.Websocket.LastEventNum
+
 	if d.Websocket != nil {
-		_ = d.Websocket.Close()
+		d.Websocket.close()
 		d.Websocket = nil
 	}
 
-	if err := d.connectWebsocket("wss://gateway.discord.gg", !freshConnect); err != nil {
+	if err := d.connectWebsocket("wss://gateway.discord.gg", !freshConnect, lastEventNum); err != nil {
 		return err
 	}
 
@@ -119,7 +153,7 @@ func (d *DiscordClient) reconnect(freshConnect bool) error {
 
 func (d *DiscordClient) listenWebsocket() error {
 	for {
-		_, message, err := d.Websocket.ReadMessage()
+		_, message, err := d.Websocket.Connection.ReadMessage()
 		if err != nil {
 			return err
 		}
@@ -161,12 +195,12 @@ func (d *DiscordClient) listenWebsocket() error {
 
 		if payload.Op == 11 {
 			now := time.Now()
-			d.LastHeartbeat = &now
+			d.Websocket.LastHeartBeat = &now
 			d.Logger.Debug().Msg("Heartbeat Ack Received")
 		}
 
 		if payload.S != nil {
-			d.LastEventNum = payload.S
+			d.Websocket.LastEventNum = payload.S
 		}
 
 		if payload.T != "" {
@@ -193,5 +227,12 @@ func (d *DiscordClient) listenWebsocket() error {
 				}
 			}()
 		}
+	}
+}
+
+func (d *Websocket) close() {
+	if d != nil {
+		_ = d.Connection.Close()
+		close(d.Closed)
 	}
 }

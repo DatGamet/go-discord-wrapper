@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
@@ -31,21 +30,13 @@ type DiscordClient struct {
 
 	Intents *types.DiscordIntent
 
-	Websocket *websocket.Conn
+	Websocket *Websocket
 
 	Events map[types.DiscordEventType][]EventHandler
 
 	mu sync.RWMutex
 
-	LastEventNum *int
-
-	ReconnectURL *string
-
-	SessionID *string
-
 	UnavailableGuilds map[types.DiscordSnowflake]struct{}
-
-	LastHeartbeat *time.Time
 
 	User *types.DiscordUser
 
@@ -103,7 +94,7 @@ func (d *DiscordClient) Login() error {
 
 	d.Logger.Debug().Msgf("Connecting to gateway websocket at %s with %d shards", gatewayResp.Url, gatewayResp.Shards)
 
-	if err := d.connectWebsocket(gatewayResp.Url, false); err != nil {
+	if err := d.connectWebsocket(gatewayResp.Url, false, nil); err != nil {
 		return err
 	}
 
@@ -122,6 +113,10 @@ func (d *DiscordClient) Login() error {
 			return
 		}
 	}()
+
+	<-d.Websocket.Ready
+
+	d.Logger.Info().Msg("Successfully connected to Discord gateway")
 
 	return nil
 }
@@ -201,8 +196,8 @@ func (d *DiscordClient) internalEventHandler(msg json.RawMessage, event types.Di
 				d.Logger.Err(err).Msg("Failed to unmarshal READY event")
 			}
 
-			d.SessionID = &readyEvent.SessionID
-			d.ReconnectURL = &readyEvent.ResumeGatewayURL
+			d.Websocket.SessionID = &readyEvent.SessionID
+			d.Websocket.ReconnectURL = &readyEvent.ResumeGatewayURL
 			d.User = &readyEvent.User
 
 			if readyEvent.Shard != nil {
@@ -214,6 +209,8 @@ func (d *DiscordClient) internalEventHandler(msg json.RawMessage, event types.Di
 					d.addUnavailableGuild(guild.Guild.GetID())
 				}
 			}
+
+			close(d.Websocket.Ready)
 
 			return true
 		}
@@ -261,5 +258,5 @@ func (d *DiscordClient) IsGuildUnavailable(id types.DiscordSnowflake) bool {
 }
 
 func (d *DiscordClient) Shutdown() {
-	_ = d.Websocket.Close()
+	_ = d.Websocket.Connection.Close()
 }
