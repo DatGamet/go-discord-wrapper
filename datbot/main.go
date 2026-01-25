@@ -25,12 +25,12 @@ func main() {
 		},
 	)
 
-	bot.OnGuildCreate(func(session *connection.Client, event *types.GuildCreateEvent) {
-		fmt.Println("New guild")
-	})
-
 	bot.OnMessageCreate(func(session *connection.Client, event *types.MessageCreateEvent) {
 		session.Logger.Info().Msgf("Received message: %s", event.Content)
+	})
+
+	bot.OnReady(func(session *connection.Client, event *types.ReadyEvent) {
+		bot.Logger.Info().Msgf("Logged in as %s#%s", event.User.Username, event.User.Discriminator)
 	})
 
 	bot.OnInteractionCreate(func(session *connection.Client, event *types.InteractionCreateEvent) {

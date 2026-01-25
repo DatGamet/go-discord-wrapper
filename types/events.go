@@ -1,22 +1,16 @@
 package types
 
-var EventFactories = map[string]func() Event{
-	"MESSAGE_CREATE": func() Event {
-		return &MessageCreateEvent{}
-	},
-	"READY": func() Event {
-		return &ReadyEvent{}
-	},
-	"GUILD_CREATE": func() Event {
-		return &GuildCreateEvent{}
-	},
-	"INTERACTION_CREATE": func() Event {
-		return &InteractionCreateEvent{}
-	},
+var EventFactories = map[EventType]func() Event{
+	EventMessageCreate:     MessageCreateEvent{}.DesiredEventType,
+	EventReady:             ReadyEvent{}.DesiredEventType,
+	EventGuildCreate:       GuildCreateEvent{}.DesiredEventType,
+	EventInteractionCreate: InteractionCreateEvent{}.DesiredEventType,
+	EventGuildDelete:       GuildDeleteEvent{}.DesiredEventType,
 }
 
 type Event interface {
 	Event() EventType
+	DesiredEventType() Event
 }
 
 type EventType string
@@ -26,6 +20,7 @@ const (
 	EventReady             EventType = "READY"
 	EventGuildCreate       EventType = "GUILD_CREATE"
 	EventInteractionCreate EventType = "INTERACTION_CREATE"
+	EventGuildDelete       EventType = "GUILD_DELETE"
 )
 
 type MessageCreateEvent struct {
@@ -33,6 +28,10 @@ type MessageCreateEvent struct {
 	GuildID  *string      `json:"guild_id"`
 	Member   *GuildMember `json:"member,omitempty"`
 	Mentions *[]User      `json:"mentions"`
+}
+
+func (e MessageCreateEvent) DesiredEventType() Event {
+	return MessageCreateEvent{}
 }
 
 func (e MessageCreateEvent) Event() EventType {
@@ -44,6 +43,10 @@ type GuildCreateEvent struct {
 	Large       bool  `json:"large"`
 	Unavailable *bool `json:"unavailable"`
 	MemberCount int   `json:"member_count"`
+}
+
+func (e GuildCreateEvent) DesiredEventType() Event {
+	return GuildCreateEvent{}
 }
 
 func (e GuildCreateEvent) Event() EventType {
@@ -58,12 +61,20 @@ type ReadyEvent struct {
 	Guilds           []AnyGuildWrapper `json:"guilds"`
 }
 
+func (e ReadyEvent) DesiredEventType() Event {
+	return ReadyEvent{}
+}
+
 func (e ReadyEvent) Event() EventType {
 	return EventReady
 }
 
 type InteractionCreateEvent struct {
 	Interaction
+}
+
+func (e InteractionCreateEvent) DesiredEventType() Event {
+	return InteractionCreateEvent{}
 }
 
 func (e InteractionCreateEvent) Event() EventType {
@@ -96,4 +107,16 @@ func (e InteractionCreateEvent) IsAutocomplete() bool {
 
 func (e InteractionCreateEvent) IsModalSubmit() bool {
 	return e.Type == InteractionTypeModalSubmit
+}
+
+type GuildDeleteEvent struct {
+	UnavailableGuild
+}
+
+func (g GuildDeleteEvent) DesiredEventType() Event {
+	return GuildDeleteEvent{}
+}
+
+func (g GuildDeleteEvent) Event() EventType {
+	return EventGuildDelete
 }

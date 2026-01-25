@@ -109,7 +109,7 @@ func (d *Client) Login() error {
 				}
 			}
 
-			d.Logger.Debug().Msg(" gateway connection closed by , no reconnecting attempt will be made")
+			d.Logger.Debug().Msg("gateway connection closed by , no reconnecting attempt will be made")
 
 			return
 		}
@@ -117,7 +117,7 @@ func (d *Client) Login() error {
 
 	<-d.Websocket.Ready
 
-	d.Logger.Info().Msg("Successfully connected to  gateway")
+	d.Logger.Info().Msg("Successfully connected to the Discord gateway")
 
 	return nil
 }
@@ -181,6 +181,36 @@ func (d *Client) OnInteractionCreate(
 	})
 }
 
+func (d *Client) OnReady(
+	handler func(*Client, *types.ReadyEvent),
+) {
+	d.OnEvent(types.EventReady, func(
+		session *Client,
+		event types.Event,
+	) {
+		if e, ok := event.(*types.ReadyEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to ReadyEvent: %T", event)
+		}
+	})
+}
+
+func (d *Client) OnGuildDelete(
+	handler func(*Client, *types.GuildDeleteEvent),
+) {
+	d.OnEvent(types.EventGuildDelete, func(
+		session *Client,
+		event types.Event,
+	) {
+		if e, ok := event.(*types.GuildDeleteEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to GuildDeleteEvent: %T", event)
+		}
+	})
+}
+
 func (d *Client) dispatch(event types.Event) {
 	handlers := d.Events[event.Event()]
 	for _, h := range handlers {
@@ -228,6 +258,26 @@ func (d *Client) internalEventHandler(msg json.RawMessage, event types.EventType
 
 				d.Logger.Debug().Msgf("Guild %s is available again", guildCreateEvent.Guild.GetID())
 				d.deleteUnavailableGuild(guildCreateEvent.Guild.GetID())
+
+				return false
+			}
+		}
+	case types.EventGuildDelete:
+		{
+			var guildDeleteEvent types.GuildDeleteEvent
+			if err := json.Unmarshal(msg, &guildDeleteEvent); err != nil {
+				d.Logger.Err(err).Msg("Failed to unmarshal GUILD_DELETE event")
+				return false
+			}
+
+			if guildDeleteEvent.Unavailable != nil && *guildDeleteEvent.Unavailable {
+				if !d.IsGuildUnavailable(guildDeleteEvent.ID) {
+					return false
+				}
+
+				d.addUnavailableGuild(guildDeleteEvent.ID)
+
+				d.Logger.Debug().Msgf("Guild %s became unavailable", guildDeleteEvent.ID)
 
 				return false
 			}
