@@ -21,6 +21,87 @@ const (
 	EventGuildCreate       EventType = "GUILD_CREATE"
 	EventInteractionCreate EventType = "INTERACTION_CREATE"
 	EventGuildDelete       EventType = "GUILD_DELETE"
+	/*TODO
+	MessageDelete
+	MessageUpdate
+
+	GuildAuditLogEntryCreate
+
+	ChannelCreate
+	ChannelUpdate
+	ChannelDelete
+	ChannelPinsUpdate
+
+	RoleCreate
+	RoleUpdate
+	RoleDelete
+
+	WebhookUpdate
+
+	IntegrationCreate
+	IntegrationUpdate
+	IntegrationDelete
+
+	AutoModerationRuleCreate
+	AutoModerationRuleUpdate
+	AutoModerationRuleDelete
+	AutoModerationActionExecute
+
+	ThreadCreate
+	ThreadUpdate
+	ThreadDelete
+	ThreadMemberUpdate
+	ThreadMembersUpdate
+
+	EntitlementCreate
+	EntitlementUpdate
+	EntitlementDelete
+
+	GuildBanAdd
+	GuildBanRemove
+	GuildEmojisUpdate
+	GuildStickersUpdate
+	GuildIntegrationsUpdate
+	GuildMemberAdd
+	GuildMemberRemove
+
+	ScheduledEventCreate
+	ScheduledEventUpdate
+	ScheduledEventDelete
+	ScheduledEventUserAdd
+	ScheduledEventUserRemove
+
+	SoundboardSoundsCreate
+	SoundboardSoundsUpdate
+	SoundboardSoundsDelete
+
+	InviteCreate
+	InviteDelete
+
+	MessageReactionAdd
+	MessageReactionRemove
+	MessageReactionRemoveAll
+	MessageReactionRemoveEmoji
+
+	PresenceUpdate
+
+	StageInstanceUpdate
+	StageInstanceCreate
+	StageInstanceDelete
+
+	SubscriptionCreate
+	SubscriptionDelete
+	SubscriptionUpdate
+
+	TypingStart
+
+	UserUpdate
+
+	VoiceStateUpdate
+
+	MessagePollVoteAdd
+	MessagePollVoteRemove
+	*/
 )
 
 type MessageCreateEvent struct {
