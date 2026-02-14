@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"go-discord-wrapper/connection"
-	"go-discord-wrapper/functions"
 	"go-discord-wrapper/types/commands"
 	"go-discord-wrapper/types/common"
 	"go-discord-wrapper/types/components"
 	"go-discord-wrapper/types/events"
 	"go-discord-wrapper/types/interactions/responses"
+	"go-discord-wrapper/util"
 	"os"
 	"os/signal"
 	"syscall"
@@ -50,7 +50,7 @@ func main() {
 						Description: "lololol",
 						Component: &components.FileUploadComponent{
 							CustomID: "input_1",
-							Required: functions.PointerTo(false),
+							Required: util.PointerOf(false),
 						},
 					}, {
 						Label:       "Input 2",
@@ -58,7 +58,7 @@ func main() {
 						Component: &components.TextInputComponent{
 							CustomID: "input_2",
 							Style:    components.TextInputStyleParagraph,
-							Required: functions.PointerTo(false),
+							Required: util.PointerOf(false),
 						},
 					}, {
 						Label:       "Input 3",
@@ -77,9 +77,9 @@ func main() {
 									Label: "three",
 								},
 							},
-							MinValues: functions.PointerTo(1),
-							MaxValues: functions.PointerTo(3),
-							Required:  functions.PointerTo(true),
+							MinValues: util.PointerOf(1),
+							MaxValues: util.PointerOf(3),
+							Required:  util.PointerOf(true),
 						},
 					},
 					{
@@ -218,7 +218,7 @@ func main() {
 						&commands.ApplicationCommandOptionChannel{
 							Name:        "channel",
 							Description: "The channel to get information about",
-							Required:    functions.PointerTo(true),
+							Required:    util.PointerOf(true),
 						},
 					},
 				},

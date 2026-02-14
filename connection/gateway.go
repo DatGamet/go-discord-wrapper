@@ -3,7 +3,6 @@ package connection
 import (
 	"encoding/json"
 	"errors"
-	"go-discord-wrapper/functions"
 	"go-discord-wrapper/types/common"
 	"go-discord-wrapper/types/events"
 	"go-discord-wrapper/util"
@@ -54,7 +53,7 @@ func WithSharding(sharding *ClientSharding) ClientOption {
 
 func WithAPIVersion(version common.APIVersion) ClientOption {
 	return func(c *Client) {
-		c.APIVersion = functions.PointerTo(version)
+		c.APIVersion = util.PointerOf(version)
 	}
 }
 
@@ -67,7 +66,7 @@ func WithLogger(logger *zerolog.Logger) ClientOption {
 func NewClient(token string, intents common.Intent, options ...ClientOption) *Client {
 	c := &Client{
 		token:             &token,
-		APIVersion:        functions.PointerTo(common.APIVersion10),
+		APIVersion:        util.PointerOf(common.APIVersion10),
 		Logger:            util.NewLogger(),
 		Intents:           &intents,
 		UnavailableGuilds: make(map[common.Snowflake]struct{}),
