@@ -25,7 +25,7 @@ func (d *Client) RegisterSingleCommand(command *applicationCommands.ApplicationC
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bot "+*d.Token)
+	req.Header.Set("Authorization", "Bot "+*d.token)
 
 	do, errDoingRequest := http.DefaultClient.Do(req)
 	if errDoingRequest != nil {
@@ -69,7 +69,7 @@ func (d *Client) BulkRegisterCommands(commands []*applicationCommands.Applicatio
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bot "+*d.Token)
+	req.Header.Set("Authorization", "Bot "+*d.token)
 
 	do, errDoingRequest := http.DefaultClient.Do(req)
 	if errDoingRequest != nil {

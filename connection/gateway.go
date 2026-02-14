@@ -23,7 +23,7 @@ type ClientSharding struct {
 }
 
 type Client struct {
-	Token *string
+	token *string
 
 	APIVersion *common.APIVersion
 
@@ -46,7 +46,7 @@ type Client struct {
 
 func NewClient(token string, intents common.Intent, sharding *ClientSharding) *Client {
 	return &Client{
-		Token:             &token,
+		token:             &token,
 		APIVersion:        functions.PointerTo(common.APIVersion10),
 		Logger:            util.NewLogger(),
 		Intents:           &intents,
@@ -64,7 +64,7 @@ func (d *Client) initializeGatewayConnection() (*common.BotRegisterResponse, err
 			Path:   common.APIBaseString(*d.APIVersion) + "gateway/bot",
 		},
 		Header: http.Header{
-			"Authorization": []string{"Bot " + *d.Token},
+			"Authorization": []string{"Bot " + *d.token},
 		},
 	})
 

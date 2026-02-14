@@ -129,7 +129,7 @@ func NewWebsocket(bot *Client, host string, isReconnect bool, lastEventNum *int)
 		if err := c.WriteJSON(map[string]interface{}{
 			"op": 6,
 			"d": map[string]interface{}{
-				"token":      *bot.Token,
+				"token":      *bot.token,
 				"session_id": ws.SessionID,
 				"seq":        *lastEventNum,
 			},
@@ -140,7 +140,7 @@ func NewWebsocket(bot *Client, host string, isReconnect bool, lastEventNum *int)
 		data := map[string]interface{}{
 			"op": 2,
 			"d": map[string]interface{}{
-				"token":   *bot.Token,
+				"token":   *bot.token,
 				"intents": *bot.Intents,
 				"properties": map[string]string{
 					"$os":      "windows",
