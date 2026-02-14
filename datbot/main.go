@@ -23,10 +23,10 @@ func main() {
 	bot := connection.NewClient(
 		os.Getenv("TOKEN"),
 		common.AllIntentsExceptDirectMessage,
-		&connection.ClientSharding{
+		connection.WithSharding(&connection.ClientSharding{
 			TotalShards: 1,
 			ShardID:     0,
-		},
+		}),
 	)
 
 	bot.OnMessageCreate(func(session *connection.Client, event *events.MessageCreateEvent) {

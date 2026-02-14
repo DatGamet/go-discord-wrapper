@@ -44,15 +44,40 @@ type Client struct {
 	Sharding *ClientSharding
 }
 
-func NewClient(token string, intents common.Intent, sharding *ClientSharding) *Client {
-	return &Client{
+type ClientOption func(*Client)
+
+func WithSharding(sharding *ClientSharding) ClientOption {
+	return func(c *Client) {
+		c.Sharding = sharding
+	}
+}
+
+func WithAPIVersion(version common.APIVersion) ClientOption {
+	return func(c *Client) {
+		c.APIVersion = functions.PointerTo(version)
+	}
+}
+
+func WithLogger(logger *zerolog.Logger) ClientOption {
+	return func(c *Client) {
+		c.Logger = logger
+	}
+}
+
+func NewClient(token string, intents common.Intent, options ...ClientOption) *Client {
+	c := &Client{
 		token:             &token,
 		APIVersion:        functions.PointerTo(common.APIVersion10),
 		Logger:            util.NewLogger(),
 		Intents:           &intents,
 		UnavailableGuilds: make(map[common.Snowflake]struct{}),
-		Sharding:          sharding,
 	}
+
+	for _, opt := range options {
+		opt(c)
+	}
+
+	return c
 }
 
 func (d *Client) initializeGatewayConnection() (*common.BotRegisterResponse, error) {
