@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go-discord-wrapper/types/applicationCommands"
+	"go-discord-wrapper/types/commands"
 	"go-discord-wrapper/types/common"
 	"net/http"
 )
 
-func (d *Client) RegisterSingleCommand(command *applicationCommands.ApplicationCommand) (*applicationCommands.ApplicationCommand, error) {
+func (d *Client) RegisterSingleCommand(command *commands.ApplicationCommand) (*commands.ApplicationCommand, error) {
 	body, marshalErr := json.Marshal(command)
 	if marshalErr != nil {
 		return nil, marshalErr
@@ -45,7 +45,7 @@ func (d *Client) RegisterSingleCommand(command *applicationCommands.ApplicationC
 		return nil, fmt.Errorf("failed to register command, status code: %s, body: %v", do.Status, body)
 	}
 
-	var registeredCommand applicationCommands.ApplicationCommand
+	var registeredCommand commands.ApplicationCommand
 	if err := json.NewDecoder(do.Body).Decode(&registeredCommand); err != nil {
 		return nil, err
 	}
@@ -53,8 +53,8 @@ func (d *Client) RegisterSingleCommand(command *applicationCommands.ApplicationC
 	return &registeredCommand, nil
 }
 
-func (d *Client) BulkRegisterCommands(commands []*applicationCommands.ApplicationCommand) (*[]*applicationCommands.ApplicationCommand, error) {
-	body, marshalErr := json.Marshal(commands)
+func (d *Client) BulkRegisterCommands(providedCommands []*commands.ApplicationCommand) (*[]*commands.ApplicationCommand, error) {
+	body, marshalErr := json.Marshal(providedCommands)
 	if marshalErr != nil {
 		return nil, marshalErr
 	}
@@ -98,7 +98,7 @@ func (d *Client) BulkRegisterCommands(commands []*applicationCommands.Applicatio
 		return nil, fmt.Errorf("failed to register command, status code: %s, body: %v", do.Status, body)
 	}
 
-	var registeredCommand []*applicationCommands.ApplicationCommand
+	var registeredCommand []*commands.ApplicationCommand
 	if err := json.NewDecoder(do.Body).Decode(&registeredCommand); err != nil {
 		return nil, err
 	}

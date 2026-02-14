@@ -1,26 +1,26 @@
-package applicationCommands
+package commands
 
 import (
 	"encoding/json"
 	"go-discord-wrapper/types/common"
 )
 
-type ApplicationCommandOptionSubCommandGroup struct {
+type ApplicationCommandOptionSubCommand struct {
 	Type                     common.ApplicationCommandOptionType `json:"type"`
 	Name                     string                              `json:"name"`
 	NameLocalizations        map[common.Locale]string            `json:"name_localizations,omitempty"`
 	Description              string                              `json:"description"`
 	DescriptionLocalizations map[common.Locale]string            `json:"description_localizations,omitempty"`
-	Options                  []AnyApplicationCommandOption       `json:"options,omitempty"`
+	Options                  *[]AnyApplicationCommandOption      `json:"options,omitempty"`
 }
 
-func (o *ApplicationCommandOptionSubCommandGroup) ApplicationCommandOptionType() common.ApplicationCommandOptionType {
-	return common.ApplicationCommandOptionTypeSubCommandGroup
+func (o *ApplicationCommandOptionSubCommand) ApplicationCommandOptionType() common.ApplicationCommandOptionType {
+	return common.ApplicationCommandOptionTypeSubCommand
 }
 
-func (o *ApplicationCommandOptionSubCommandGroup) MarshalJSON() ([]byte, error) {
+func (o *ApplicationCommandOptionSubCommand) MarshalJSON() ([]byte, error) {
 	o.Type = o.ApplicationCommandOptionType()
-	type Alias ApplicationCommandOptionSubCommandGroup
+	type Alias ApplicationCommandOptionSubCommand
 	return json.Marshal(&struct {
 		*Alias
 	}{
@@ -28,8 +28,8 @@ func (o *ApplicationCommandOptionSubCommandGroup) MarshalJSON() ([]byte, error) 
 	})
 }
 
-func (o *ApplicationCommandOptionSubCommandGroup) UnmarshalJSON(data []byte) error {
-	type Alias ApplicationCommandOptionSubCommandGroup
+func (o *ApplicationCommandOptionSubCommand) UnmarshalJSON(data []byte) error {
+	type Alias ApplicationCommandOptionSubCommand
 	raw := &struct {
 		*Alias
 		Options []json.RawMessage `json:"options,omitempty"`
@@ -46,7 +46,7 @@ func (o *ApplicationCommandOptionSubCommandGroup) UnmarshalJSON(data []byte) err
 		if err != nil {
 			return err
 		}
-		o.Options = opts
+		o.Options = &opts
 	}
 
 	return nil

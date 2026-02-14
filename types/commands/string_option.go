@@ -1,4 +1,4 @@
-package applicationCommands
+package commands
 
 import (
 	"encoding/json"

@@ -1,11 +1,11 @@
-package applicationCommands
+package commands
 
 import (
 	"encoding/json"
 	"go-discord-wrapper/types/common"
 )
 
-type ApplicationCommandOptionAttachment struct {
+type ApplicationCommandOptionBoolean struct {
 	Type                     common.ApplicationCommandOptionType `json:"type"`
 	Name                     string                              `json:"name"`
 	NameLocalizations        map[common.Locale]string            `json:"name_localizations,omitempty"`
@@ -14,13 +14,13 @@ type ApplicationCommandOptionAttachment struct {
 	Required                 *bool                               `json:"required,omitempty"`
 }
 
-func (o *ApplicationCommandOptionAttachment) ApplicationCommandOptionType() common.ApplicationCommandOptionType {
-	return common.ApplicationCommandOptionTypeAttachment
+func (o *ApplicationCommandOptionBoolean) ApplicationCommandOptionType() common.ApplicationCommandOptionType {
+	return common.ApplicationCommandOptionTypeBoolean
 }
 
-func (o *ApplicationCommandOptionAttachment) MarshalJSON() ([]byte, error) {
+func (o *ApplicationCommandOptionBoolean) MarshalJSON() ([]byte, error) {
 	o.Type = o.ApplicationCommandOptionType()
-	type Alias ApplicationCommandOptionAttachment
+	type Alias ApplicationCommandOptionBoolean
 	return json.Marshal(&struct {
 		*Alias
 	}{
@@ -28,8 +28,8 @@ func (o *ApplicationCommandOptionAttachment) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (o *ApplicationCommandOptionAttachment) UnmarshalJSON(data []byte) error {
-	type Alias ApplicationCommandOptionAttachment
+func (o *ApplicationCommandOptionBoolean) UnmarshalJSON(data []byte) error {
+	type Alias ApplicationCommandOptionBoolean
 	aux := &struct {
 		*Alias
 	}{

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"go-discord-wrapper/connection"
 	"go-discord-wrapper/functions"
-	"go-discord-wrapper/types/applicationCommands"
+	"go-discord-wrapper/types/commands"
 	"go-discord-wrapper/types/common"
 	"go-discord-wrapper/types/components"
 	"go-discord-wrapper/types/events"
@@ -205,17 +205,17 @@ func main() {
 		panic(err)
 	}
 
-	res, err := bot.BulkRegisterCommands([]*applicationCommands.ApplicationCommand{
+	res, err := bot.BulkRegisterCommands([]*commands.ApplicationCommand{
 		{
 			Name:        "info",
 			Description: "Get information",
 			Type:        common.ApplicationCommandTypeChatInput,
-			Options: &[]applicationCommands.AnyApplicationCommandOption{
-				&applicationCommands.ApplicationCommandOptionSubCommand{
+			Options: &[]commands.AnyApplicationCommandOption{
+				&commands.ApplicationCommandOptionSubCommand{
 					Name:        "channel",
 					Description: "Get information about the channel",
-					Options: &[]applicationCommands.AnyApplicationCommandOption{
-						&applicationCommands.ApplicationCommandOptionChannel{
+					Options: &[]commands.AnyApplicationCommandOption{
+						&commands.ApplicationCommandOptionChannel{
 							Name:        "channel",
 							Description: "The channel to get information about",
 							Required:    functions.PointerTo(true),
