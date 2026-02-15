@@ -109,8 +109,8 @@ type LabelComponentInteractionResponse struct {
 	CustomID string               `json:"custom_id,omitempty"`
 }
 
-func (l *LabelComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
+func (l *LabelComponentInteractionResponse) IsInteractionResponseDataComponent() {
+
 }
 
 func (l *LabelComponentInteractionResponse) MarshalJSON() ([]byte, error) {
@@ -192,7 +192,12 @@ func (l *ComponentLabelComponent) UnmarshalJSON(data []byte) error {
 		c = &FileUploadComponentInteractionResponse{}
 	case common.ComponentTypeLabel:
 		c = &LabelComponentInteractionResponse{}
-	//TODO: Checkbox, CheckboxGroup, RadioGroup, FileDisplay
+	case common.ComponentTypeRadioGroup:
+		c = &RadioGroupComponentInteractionResponse{}
+	case common.ComponentTypeCheckboxGroup:
+		c = &CheckboxGroupComponentInteractionResponse{}
+	case common.ComponentTypeCheckbox:
+		c = &CheckboxComponentInteractionResponse{}
 
 	default:
 		return fmt.Errorf("unknown interaction component type: %d", probe.Type)

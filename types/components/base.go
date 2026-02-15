@@ -7,25 +7,25 @@ import (
 type AnyContainerComponent interface {
 	MarshalJSON() ([]byte, error)
 	GetType() common.ComponentType
-	IsAnyContainerComponent() bool
+	IsAnyContainerComponent()
 }
 
 type AnyChildComponent interface {
-	IsAnyLabelComponent() bool
+	IsAnyLabelComponent()
 }
 
 type AnyComponentInteractionResponse interface {
-	IsInteractionResponseDataComponent() bool
+	IsInteractionResponseDataComponent()
 	MarshalJSON() ([]byte, error)
 	UnmarshalJSON([]byte) error
 }
 
 type AnySectionComponent interface {
-	IsAnySectionComponent() bool
+	IsAnySectionComponent()
 }
 
 type AnySectionAccessory interface {
-	IsAnySectionAccessory() bool
+	IsAnySectionAccessory()
 }
 
 type SelectDefaultValue struct {

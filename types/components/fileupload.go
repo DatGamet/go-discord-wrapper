@@ -42,8 +42,8 @@ func (f *FileUploadComponent) GetType() common.ComponentType {
 	return common.ComponentTypeFileUpload
 }
 
-func (f *FileUploadComponent) IsAnyLabelComponent() bool {
-	return true
+func (f *FileUploadComponent) IsAnyLabelComponent() {
+
 }
 
 type FileUploadComponentInteractionResponse struct {
@@ -53,8 +53,8 @@ type FileUploadComponentInteractionResponse struct {
 	Values   []common.Snowflake   `json:"values"`
 }
 
-func (f *FileUploadComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
+func (f *FileUploadComponentInteractionResponse) IsInteractionResponseDataComponent() {
+
 }
 
 func (f *FileUploadComponentInteractionResponse) MarshalJSON() ([]byte, error) {

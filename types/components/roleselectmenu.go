@@ -49,8 +49,8 @@ func (r *RoleSelectMenuComponent) GetType() common.ComponentType {
 	return common.ComponentTypeRoleSelectMenu
 }
 
-func (r *RoleSelectMenuComponent) IsAnyLabelComponent() bool {
-	return true
+func (r *RoleSelectMenuComponent) IsAnyLabelComponent() {
+
 }
 
 type RoleComponentInteractionResponse struct {
@@ -62,9 +62,7 @@ type RoleComponentInteractionResponse struct {
 	Resolved      *common.ResolvedData `json:"resolved,omitempty"`
 }
 
-func (r *RoleComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
-}
+func (r *RoleComponentInteractionResponse) IsInteractionResponseDataComponent() {}
 
 func (r *RoleComponentInteractionResponse) MarshalJSON() ([]byte, error) {
 	r.ComponentType = common.ComponentTypeRoleSelectMenu

@@ -47,6 +47,4 @@ func (s *SeparatorComponent) GetType() common.ComponentType {
 	return common.ComponentTypeSeparator
 }
 
-func (s *SeparatorComponent) IsAnyContainerComponent() bool {
-	return true
-}
+func (s *SeparatorComponent) IsAnyContainerComponent() {}

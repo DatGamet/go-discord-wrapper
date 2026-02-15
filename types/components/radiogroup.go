@@ -48,6 +48,40 @@ func (r *RadioGroupComponent) GetType() common.ComponentType {
 	return common.ComponentTypeRadioGroup
 }
 
-func (r *RadioGroupComponent) IsAnyLabelComponent() bool {
-	return true
+func (r *RadioGroupComponent) IsAnyLabelComponent() {
+
+}
+
+type RadioGroupComponentInteractionResponse struct {
+	Type     common.ComponentType `json:"type"`
+	ID       *int                 `json:"id,omitempty"`
+	CustomID string               `json:"custom_id,omitempty"`
+	Value    *string              `json:"value"`
+}
+
+func (r *RadioGroupComponentInteractionResponse) IsInteractionResponseDataComponent() {}
+
+func (r *RadioGroupComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	r.Type = common.ComponentTypeRadioGroup
+
+	type Alias RadioGroupComponentInteractionResponse
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(r),
+	})
+}
+
+func (r *RadioGroupComponentInteractionResponse) UnmarshalJSON(bytes []byte) error {
+	type Alias RadioGroupComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(bytes, &raw); err != nil {
+		return err
+	}
+
+	*r = RadioGroupComponentInteractionResponse(*raw.Alias)
+	return nil
 }

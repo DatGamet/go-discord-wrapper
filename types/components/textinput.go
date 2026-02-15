@@ -52,12 +52,12 @@ func (t *TextInputComponent) GetType() common.ComponentType {
 	return common.ComponentTypeTextInput
 }
 
-func (t *TextInputComponent) IsAnyContainerComponent() bool {
-	return true
+func (t *TextInputComponent) IsAnyContainerComponent() {
+
 }
 
-func (t *TextInputComponent) IsAnyLabelComponent() bool {
-	return true
+func (t *TextInputComponent) IsAnyLabelComponent() {
+
 }
 
 type TextInputComponentInteractionResponse struct {
@@ -67,8 +67,8 @@ type TextInputComponentInteractionResponse struct {
 	CustomID string               `json:"custom_id"`
 }
 
-func (t *TextInputComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
+func (t *TextInputComponentInteractionResponse) IsInteractionResponseDataComponent() {
+
 }
 
 func (t *TextInputComponentInteractionResponse) MarshalJSON() ([]byte, error) {

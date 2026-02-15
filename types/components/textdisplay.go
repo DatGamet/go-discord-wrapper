@@ -25,9 +25,7 @@ func (t *TextDisplayComponent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (t *TextDisplayComponent) IsAnyContainerComponent() bool {
-	return true
-}
+func (t *TextDisplayComponent) IsAnyContainerComponent() {}
 
 func (t *TextDisplayComponent) GetType() common.ComponentType {
 	return common.ComponentTypeTextDisplay
@@ -43,18 +41,14 @@ func (t *TextDisplayComponent) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (t *TextDisplayComponent) IsAnySectionComponent() bool {
-	return true
-}
+func (t *TextDisplayComponent) IsAnySectionComponent() {}
 
 type TextDisplayComponentInteractionResponse struct {
 	Type common.ComponentType `json:"type"`
 	ID   *int                 `json:"id,omitempty"`
 }
 
-func (t *TextDisplayComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
-}
+func (t *TextDisplayComponentInteractionResponse) IsInteractionResponseDataComponent() {}
 
 func (t *TextDisplayComponentInteractionResponse) MarshalJSON() ([]byte, error) {
 	t.Type = common.ComponentTypeTextDisplay

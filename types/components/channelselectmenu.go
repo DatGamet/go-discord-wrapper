@@ -49,8 +49,8 @@ func (c *ChannelSelectMenuComponent) GetType() common.ComponentType {
 	return common.ComponentTypeChannelSelect
 }
 
-func (c *ChannelSelectMenuComponent) IsAnyLabelComponent() bool {
-	return true
+func (c *ChannelSelectMenuComponent) IsAnyLabelComponent() {
+
 }
 
 type ChannelComponentInteractionResponse struct {
@@ -62,9 +62,7 @@ type ChannelComponentInteractionResponse struct {
 	Resolved      *common.ResolvedData `json:"resolved,omitempty"`
 }
 
-func (c *ChannelComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
-}
+func (c *ChannelComponentInteractionResponse) IsInteractionResponseDataComponent() {}
 
 func (c *ChannelComponentInteractionResponse) MarshalJSON() ([]byte, error) {
 	c.ComponentType = common.ComponentTypeChannelSelect

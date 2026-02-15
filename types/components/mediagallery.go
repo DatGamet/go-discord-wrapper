@@ -39,8 +39,8 @@ func (m *MediaGalleryComponent) GetType() common.ComponentType {
 	return common.ComponentTypeMediaGallery
 }
 
-func (m *MediaGalleryComponent) IsAnyContainerComponent() bool {
-	return true
+func (m *MediaGalleryComponent) IsAnyContainerComponent() {
+
 }
 
 type MediaGalleryItem struct {

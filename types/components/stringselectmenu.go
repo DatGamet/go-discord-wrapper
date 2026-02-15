@@ -57,8 +57,8 @@ type StringSelectMenuComponentOption struct {
 	Default     bool          `json:"default,omitempty"`
 }
 
-func (s *StringSelectMenuComponent) IsAnyLabelComponent() bool {
-	return true
+func (s *StringSelectMenuComponent) IsAnyLabelComponent() {
+
 }
 
 type StringSelectComponentInteractionResponse struct {
@@ -69,8 +69,8 @@ type StringSelectComponentInteractionResponse struct {
 	ComponentType common.ComponentType `json:"component_type"`
 }
 
-func (s *StringSelectComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
+func (s *StringSelectComponentInteractionResponse) IsInteractionResponseDataComponent() {
+
 }
 
 func (s *StringSelectComponentInteractionResponse) MarshalJSON() ([]byte, error) {

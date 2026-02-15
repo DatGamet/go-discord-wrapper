@@ -35,8 +35,8 @@ func (m *MentionableSelectMenuComponent) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (m *MentionableSelectMenuComponent) IsAnyLabelComponent() bool {
-	return true
+func (m *MentionableSelectMenuComponent) IsAnyLabelComponent() {
+
 }
 
 func (m *MentionableSelectMenuComponent) MarshalJSON() ([]byte, error) {
@@ -62,8 +62,7 @@ type MentionableComponentInteractionResponse struct {
 	Resolved      *common.ResolvedData `json:"resolved,omitempty"`
 }
 
-func (m *MentionableComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
+func (m *MentionableComponentInteractionResponse) IsInteractionResponseDataComponent() {
 }
 
 func (m *MentionableComponentInteractionResponse) MarshalJSON() ([]byte, error) {

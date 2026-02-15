@@ -42,6 +42,6 @@ func (f *FileComponent) GetType() common.ComponentType {
 	return common.ComponentTypeFileDisplay
 }
 
-func (f *FileComponent) IsAnyContainerComponent() bool {
-	return true
+func (f *FileComponent) IsAnyContainerComponent() {
+
 }

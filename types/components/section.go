@@ -12,8 +12,8 @@ type Section struct {
 	Accessory  AnySectionAccessory    `json:"accessory,omitempty"`
 }
 
-func (s *Section) IsAnyContainerComponent() bool {
-	return true
+func (s *Section) IsAnyContainerComponent() {
+
 }
 
 func (s *Section) UnmarshalJSON(data []byte) error {

@@ -40,6 +40,39 @@ func (c *CheckboxComponent) GetType() common.ComponentType {
 	return common.ComponentTypeCheckbox
 }
 
-func (c *CheckboxComponent) IsAnyLabelComponent() bool {
-	return true
+func (c *CheckboxComponent) IsAnyLabelComponent() {
+
+}
+
+type CheckboxComponentInteractionResponse struct {
+	Type     common.ComponentType `json:"type"`
+	Value    bool                 `json:"value"`
+	ID       *int                 `json:"id,omitempty"`
+	CustomID string               `json:"custom_id,omitempty"`
+}
+
+func (c *CheckboxComponentInteractionResponse) IsInteractionResponseDataComponent() {}
+
+func (c *CheckboxComponentInteractionResponse) MarshalJSON() ([]byte, error) {
+	c.Type = common.ComponentTypeCheckbox
+	type Alias CheckboxComponentInteractionResponse
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(c),
+	})
+}
+
+func (c *CheckboxComponentInteractionResponse) UnmarshalJSON(bytes []byte) error {
+	type Alias CheckboxComponentInteractionResponse
+	var raw struct {
+		*Alias
+	}
+
+	if err := json.Unmarshal(bytes, &raw); err != nil {
+		return err
+	}
+
+	*c = CheckboxComponentInteractionResponse(*raw.Alias)
+	return nil
 }

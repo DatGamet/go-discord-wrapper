@@ -25,8 +25,8 @@ func (a *ActionRow) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (a *ActionRow) IsAnyContainerComponent() bool {
-	return true
+func (a *ActionRow) IsAnyContainerComponent() {
+
 }
 
 func (a *ActionRow) UnmarshalJSON(data []byte) error {

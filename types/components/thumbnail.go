@@ -41,6 +41,4 @@ func (t *ThumbnailComponent) GetType() common.ComponentType {
 	return common.ComponentTypeThumbnail
 }
 
-func (t *ThumbnailComponent) IsAnySectionAccessory() bool {
-	return true
-}
+func (t *ThumbnailComponent) IsAnySectionAccessory() {}

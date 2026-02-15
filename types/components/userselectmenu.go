@@ -49,8 +49,7 @@ func (u *UserSelectMenuComponent) GetType() common.ComponentType {
 	return common.ComponentTypeUserSelectMenu
 }
 
-func (u *UserSelectMenuComponent) IsAnyLabelComponent() bool {
-	return true
+func (u *UserSelectMenuComponent) IsAnyLabelComponent() {
 }
 
 type UserSelectComponentInteractionResponse struct {
@@ -62,8 +61,8 @@ type UserSelectComponentInteractionResponse struct {
 	Resolved      *common.ResolvedData `json:"resolved,omitempty"`
 }
 
-func (u *UserSelectComponentInteractionResponse) IsInteractionResponseDataComponent() bool {
-	return true
+func (u *UserSelectComponentInteractionResponse) IsInteractionResponseDataComponent() {
+
 }
 
 func (u *UserSelectComponentInteractionResponse) MarshalJSON() ([]byte, error) {

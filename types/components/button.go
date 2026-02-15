@@ -56,10 +56,7 @@ func (b *ButtonComponent) GetType() common.ComponentType {
 	return common.ComponentTypeButton
 }
 
-func (b *ButtonComponent) IsAnySectionAccessory() bool {
-	return true
-}
+func (b *ButtonComponent) IsAnySectionAccessory() {}
 
-func (b *ButtonComponent) IsAnyContainerAccessory() bool {
-	return true
+func (b *ButtonComponent) IsAnyContainerAccessory() {
 }
