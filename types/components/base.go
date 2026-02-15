@@ -1,7 +1,7 @@
 package components
 
 import (
-	"github.com/DatGamet/go-discord-wrapper/types/common"
+	"github.com/streame-gg/go-discord-wrapper/types/common"
 )
 
 type AnyContainerComponent interface {

@@ -7,13 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/DatGamet/go-discord-wrapper/connection"
-	"github.com/DatGamet/go-discord-wrapper/types/commands"
-	"github.com/DatGamet/go-discord-wrapper/types/common"
-	"github.com/DatGamet/go-discord-wrapper/types/components"
-	"github.com/DatGamet/go-discord-wrapper/types/events"
-	"github.com/DatGamet/go-discord-wrapper/types/interactions/responses"
-	"github.com/DatGamet/go-discord-wrapper/util"
+	"github.com/streame-gg/go-discord-wrapper/connection"
+	"github.com/streame-gg/go-discord-wrapper/types/commands"
+	"github.com/streame-gg/go-discord-wrapper/types/common"
+	"github.com/streame-gg/go-discord-wrapper/types/components"
+	"github.com/streame-gg/go-discord-wrapper/types/events"
+	"github.com/streame-gg/go-discord-wrapper/types/interactions/responses"
+	"github.com/streame-gg/go-discord-wrapper/util"
 
 	"github.com/joho/godotenv"
 )

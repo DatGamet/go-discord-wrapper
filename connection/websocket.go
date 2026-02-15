@@ -2,8 +2,8 @@ package connection
 
 import (
 	"encoding/json"
-	"github.com/DatGamet/go-discord-wrapper/types/common"
-	"github.com/DatGamet/go-discord-wrapper/types/events"
+	"github.com/streame-gg/go-discord-wrapper/types/common"
+	"github.com/streame-gg/go-discord-wrapper/types/events"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -144,8 +144,8 @@ func NewWebsocket(bot *Client, host string, isReconnect bool, lastEventNum *int)
 				"intents": *bot.Intents,
 				"properties": map[string]string{
 					"$os":      "windows",
-					"$browser": "https://github.com/DatGamet/go-discord-wrapper@alpha",
-					"$device":  "https://github.com/DatGamet/go-discord-wrapper@alpha",
+					"$browser": "https://github.com/streame-gg/go-discord-wrapper@alpha",
+					"$device":  "https://github.com/streame-gg/go-discord-wrapper@alpha",
 				},
 			},
 		}

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/DatGamet/go-discord-wrapper/types/commands"
-	"github.com/DatGamet/go-discord-wrapper/types/common"
+	"github.com/streame-gg/go-discord-wrapper/types/commands"
+	"github.com/streame-gg/go-discord-wrapper/types/common"
 	"net/http"
 )
 

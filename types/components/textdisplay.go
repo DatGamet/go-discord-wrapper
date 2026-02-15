@@ -2,7 +2,7 @@ package components
 
 import (
 	"encoding/json"
-	"github.com/DatGamet/go-discord-wrapper/types/common"
+	"github.com/streame-gg/go-discord-wrapper/types/common"
 )
 
 type TextDisplayComponent struct {

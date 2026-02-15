@@ -1,4 +1,4 @@
-module github.com/DatGamet/go-discord-wrapper
+module github.com/streame-gg/go-discord-wrapper
 
 go 1.26
 
