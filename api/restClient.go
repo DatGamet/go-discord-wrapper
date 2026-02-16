@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -62,11 +64,13 @@ func (c *RestClient) generateRequest(method, path string, body io.Reader) (*http
 
 	req.Header.Set("Authorization", "Bot "+c.token)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", fmt.Sprintf("GoDiscordWrapper (%s@%s)", common.RepositoryURL, common.RepositoryVersion))
 
 	return req, nil
 }
 
-func (c *RestClient) do(req *http.Request, v interface{}) (*http.Response, error) {
+func (c *RestClient) do(req *http.Request, v interface{}, successResponseCode int) (*http.Response, error) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -74,5 +78,18 @@ func (c *RestClient) do(req *http.Request, v interface{}) (*http.Response, error
 
 	defer resp.Body.Close()
 
-	return nil, nil
+	if resp.StatusCode != successResponseCode {
+		var respErr common.GatewayError
+		if err := json.NewDecoder(resp.Body).Decode(&respErr); err != nil {
+			return nil, err
+		}
+
+		return nil, respErr
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(v); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

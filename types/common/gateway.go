@@ -115,3 +115,13 @@ type BotRegisterResponse struct {
 		ResetAfter int `json:"reset_after"`
 	} `json:"session_start_limit"`
 }
+
+type GatewayError struct {
+	Code    int                    `json:"code"`
+	Errors  map[string]interface{} `json:"errors"`
+	Message string                 `json:"message"`
+}
+
+func (g GatewayError) Error() string {
+	return string(rune(g.Code)) + " " + g.Message
+}
