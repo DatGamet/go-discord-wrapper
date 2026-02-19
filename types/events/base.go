@@ -8,6 +8,8 @@ var EventFactories = map[EventType]func() Event{
 	EventGuildDelete:       GuildDeleteEvent{}.DesiredEventType,
 	EventInviteCreate:      InviteCreateEvent{}.DesiredEventType,
 	EventInviteDelete:      InviteDeleteEvent{}.DesiredEventType,
+	EventChannelCreate:     ChannelCreateEvent{}.DesiredEventType,
+	EventChannelDelete:     ChannelDeleteEvent{}.DesiredEventType,
 }
 
 type Event interface {
@@ -28,54 +30,59 @@ const (
 	MessageUpdate
 
 	GuildAuditLogEntryCreate
+	*/
+	EventChannelCreate EventType = "CHANNEL_CREATE"
+	// ChannelUpdate     EventType = "CHANNEL_UPDATE"
+	EventChannelDelete EventType = "CHANNEL_DELETE"
+	/*
+		ChannelPinsUpdate EventType = "CHANNEL_PINS_UPDATE"
 
-	ChannelCreate
-	ChannelUpdate
-	ChannelDelete
-	ChannelPinsUpdate
 
-	RoleCreate
-	RoleUpdate
-	RoleDelete
+			EventChannelDelete
+			ChannelPinsUpdate
 
-	WebhookUpdate
+			RoleCreate
+			RoleUpdate
+			RoleDelete
 
-	IntegrationCreate
-	IntegrationUpdate
-	IntegrationDelete
+			WebhookUpdate
 
-	AutoModerationRuleCreate
-	AutoModerationRuleUpdate
-	AutoModerationRuleDelete
-	AutoModerationActionExecute
+			IntegrationCreate
+			IntegrationUpdate
+			IntegrationDelete
 
-	ThreadCreate
-	ThreadUpdate
-	ThreadDelete
-	ThreadMemberUpdate
-	ThreadMembersUpdate
+			AutoModerationRuleCreate
+			AutoModerationRuleUpdate
+			AutoModerationRuleDelete
+			AutoModerationActionExecute
 
-	EntitlementCreate
-	EntitlementUpdate
-	EntitlementDelete
+			ThreadCreate
+			ThreadUpdate
+			ThreadDelete
+			ThreadMemberUpdate
+			ThreadMembersUpdate
 
-	GuildBanAdd
-	GuildBanRemove
-	GuildEmojisUpdate
-	GuildStickersUpdate
-	GuildIntegrationsUpdate
-	GuildMemberAdd
-	GuildMemberRemove
+			EntitlementCreate
+			EntitlementUpdate
+			EntitlementDelete
 
-	ScheduledEventCreate
-	ScheduledEventUpdate
-	ScheduledEventDelete
-	ScheduledEventUserAdd
-	ScheduledEventUserRemove
+			GuildBanAdd
+			GuildBanRemove
+			GuildEmojisUpdate
+			GuildStickersUpdate
+			GuildIntegrationsUpdate
+			GuildMemberAdd
+			GuildMemberRemove
 
-	SoundboardSoundsCreate
-	SoundboardSoundsUpdate
-	SoundboardSoundsDelete
+			ScheduledEventCreate
+			ScheduledEventUpdate
+			ScheduledEventDelete
+			ScheduledEventUserAdd
+			ScheduledEventUserRemove
+
+			SoundboardSoundsCreate
+			SoundboardSoundsUpdate
+			SoundboardSoundsDelete
 
 	*/
 	EventInviteCreate EventType = "INVITE_CREATE"

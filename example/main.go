@@ -33,6 +33,14 @@ func main() {
 		}),
 	)
 
+	bot.OnChannelCreate(func(client *connection.Client, event *events.ChannelCreateEvent) {
+		client.Logger.Info().Msgf("Channel created: %s (ID: %s)", event.Name, event.ID)
+	})
+
+	bot.OnChannelDelete(func(client *connection.Client, event *events.ChannelDeleteEvent) {
+		client.Logger.Info().Msgf("Channel deleted: %s (ID: %s)", event.Name, event.ID)
+	})
+
 	bot.OnInviteDelete(func(session *connection.Client, event *events.InviteDeleteEvent) {
 		session.Logger.Info().Msgf("Invite deleted: %s", event.Code)
 	})

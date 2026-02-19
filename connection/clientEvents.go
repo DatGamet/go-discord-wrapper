@@ -120,3 +120,33 @@ func (d *Client) OnInviteDelete(
 		}
 	})
 }
+
+func (d *Client) OnChannelCreate(
+	handler func(*Client, *events.ChannelCreateEvent),
+) {
+	d.OnEvent(events.EventChannelCreate, func(
+		session *Client,
+		event events.Event,
+	) {
+		if e, ok := event.(*events.ChannelCreateEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to ChannelCreateEvent: %T", event)
+		}
+	})
+}
+
+func (d *Client) OnChannelDelete(
+	handler func(*Client, *events.ChannelDeleteEvent),
+) {
+	d.OnEvent(events.EventChannelDelete, func(
+		session *Client,
+		event events.Event,
+	) {
+		if e, ok := event.(*events.ChannelDeleteEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to ChannelDeleteEvent: %T", event)
+		}
+	})
+}

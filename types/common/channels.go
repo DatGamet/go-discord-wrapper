@@ -43,7 +43,7 @@ type Channel struct {
 	GuildID                       *Snowflake                    `json:"guild_id,omitempty"`
 	Position                      *int                          `json:"position,omitempty"`
 	PermissionOverwrites          []ChannelPermissionOverwrites `json:"permission_overwrites,omitempty"`
-	Name                          *string                       `json:"name,omitempty"`
+	Name                          string                        `json:"name,omitempty"`
 	Topic                         *string                       `json:"topic,omitempty"`
 	NSFW                          *bool                         `json:"nsfw,omitempty"`
 	LastMessageID                 *Snowflake                    `json:"last_message_id,omitempty"`
