@@ -37,6 +37,18 @@ func main() {
 		client.Logger.Info().Msgf("Channel created: %s (ID: %s)", event.Name, event.ID)
 	})
 
+	bot.OnMessageUpdate(func(client *connection.Client, event *events.MessageUpdateEvent) {
+		client.Logger.Info().Msgf("Message updated: ID %s", event.ID)
+	})
+
+	bot.OnMessageDelete(func(client *connection.Client, event *events.MessageDeleteEvent) {
+		client.Logger.Info().Msgf("Message deleted: ID %s", event.ID)
+	})
+
+	bot.OnMessageDeleteBulk(func(client *connection.Client, event *events.MessageDeleteBulkEvent) {
+		client.Logger.Info().Msgf("Messages deleted: ID %s", event.IDs)
+	})
+
 	bot.OnChannelDelete(func(client *connection.Client, event *events.ChannelDeleteEvent) {
 		client.Logger.Info().Msgf("Channel deleted: %s (ID: %s)", event.Name, event.ID)
 	})

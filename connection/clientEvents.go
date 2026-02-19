@@ -150,3 +150,48 @@ func (d *Client) OnChannelDelete(
 		}
 	})
 }
+
+func (d *Client) OnMessageDelete(
+	handler func(*Client, *events.MessageDeleteEvent),
+) {
+	d.OnEvent(events.EventMessageDelete, func(
+		session *Client,
+		event events.Event,
+	) {
+		if e, ok := event.(*events.MessageDeleteEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to MessageDeleteEvent: %T", event)
+		}
+	})
+}
+
+func (d *Client) OnMessageDeleteBulk(
+	handler func(*Client, *events.MessageDeleteBulkEvent),
+) {
+	d.OnEvent(events.EventMessageDeleteBulk, func(
+		session *Client,
+		event events.Event,
+	) {
+		if e, ok := event.(*events.MessageDeleteBulkEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to MessageDeleteBulkEvent: %T", event)
+		}
+	})
+}
+
+func (d *Client) OnMessageUpdate(
+	handler func(*Client, *events.MessageUpdateEvent),
+) {
+	d.OnEvent(events.EventMessageUpdate, func(
+		session *Client,
+		event events.Event,
+	) {
+		if e, ok := event.(*events.MessageUpdateEvent); ok {
+			handler(session, e)
+		} else {
+			d.Logger.Warn().Msgf("Failed to cast event to MessageUpdateEvent: %T", event)
+		}
+	})
+}

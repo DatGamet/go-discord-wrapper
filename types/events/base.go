@@ -10,6 +10,9 @@ var EventFactories = map[EventType]func() Event{
 	EventInviteDelete:      InviteDeleteEvent{}.DesiredEventType,
 	EventChannelCreate:     ChannelCreateEvent{}.DesiredEventType,
 	EventChannelDelete:     ChannelDeleteEvent{}.DesiredEventType,
+	EventMessageDelete:     MessageDeleteEvent{}.DesiredEventType,
+	EventMessageDeleteBulk: MessageDeleteBulkEvent{}.DesiredEventType,
+	EventMessageUpdate:     MessageUpdateEvent{}.DesiredEventType,
 }
 
 type Event interface {
@@ -20,17 +23,16 @@ type Event interface {
 type EventType string
 
 const (
-	EventMessageCreate     EventType = "MESSAGE_CREATE"
-	EventReady             EventType = "READY"
-	EventGuildCreate       EventType = "GUILD_CREATE"
-	EventInteractionCreate EventType = "INTERACTION_CREATE"
-	EventGuildDelete       EventType = "GUILD_DELETE"
-	/*TODO
-	MessageDelete
-	MessageUpdate
+	EventMessageCreate            EventType = "MESSAGE_CREATE"
+	EventReady                    EventType = "READY"
+	EventGuildCreate              EventType = "GUILD_CREATE"
+	EventInteractionCreate        EventType = "INTERACTION_CREATE"
+	EventGuildDelete              EventType = "GUILD_DELETE"
+	EventMessageDelete            EventType = "MESSAGE_DELETE"
+	EventMessageDeleteBulk        EventType = "MESSAGE_DELETE_BULK"
+	EventMessageUpdate            EventType = "MESSAGE_UPDATE"
+	EventGuildAuditLogEntryCreate EventType = "GUILD_AUDIT_LOG_ENTRY_CREATE"
 
-	GuildAuditLogEntryCreate
-	*/
 	EventChannelCreate EventType = "CHANNEL_CREATE"
 	// ChannelUpdate     EventType = "CHANNEL_UPDATE"
 	EventChannelDelete EventType = "CHANNEL_DELETE"
